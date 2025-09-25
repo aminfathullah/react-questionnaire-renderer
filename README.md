@@ -27,17 +27,17 @@ Ensure your project also installs the peer dependencies: `react`, `react-dom`, `
 
 #### When hosted on GitHub only
 
-If the package is not on npm yet, you can install it straight from the GitHub repository. Replace `<owner>/<repo>` with your GitHub namespace, and optionally pin to a branch, tag, or commit for reproducible builds.
+If the package is not on npm yet, you can install it straight from the GitHub repository. Replace `aminfathullah/react-questionnaire-renderer` with your GitHub namespace, and optionally pin to a branch, tag, or commit for reproducible builds.
 
 ```bash
 # Latest main branch
-npm install "github:<owner>/<repo>"
+npm install "github:aminfathullah/react-questionnaire-renderer"
 
 # Specific tag or release
-npm install "github:<owner>/<repo>#v0.1.0"
+npm install "github:aminfathullah/react-questionnaire-renderer#v0.1.0"
 
 # Specific commit
-npm install "github:<owner>/<repo>#<commit-sha>"
+npm install "github:aminfathullah/react-questionnaire-renderer#<commit-sha>"
 ```
 
 Alternatively, reference the GitHub tarball directly in `package.json`:
@@ -45,7 +45,7 @@ Alternatively, reference the GitHub tarball directly in `package.json`:
 ```json
 {
 	"dependencies": {
-		"react-questionnaire-renderer": "git+https://github.com/<owner>/<repo>.git"
+		"react-questionnaire-renderer": "git+https://github.com/aminfathullah/react-questionnaire-renderer.git"
 	}
 }
 ```
