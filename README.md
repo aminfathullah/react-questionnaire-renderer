@@ -15,6 +15,8 @@ This project provides a configurable questionnaire renderer for React applicatio
 
 ### Installation (library consumers)
 
+#### When published to npm
+
 ```bash
 yarn add react-questionnaire-renderer
 # or
@@ -22,6 +24,45 @@ npm install react-questionnaire-renderer
 ```
 
 Ensure your project also installs the peer dependencies: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`, `@emotion/react`, and `@emotion/styled`.
+
+#### When hosted on GitHub only
+
+If the package is not on npm yet, you can install it straight from the GitHub repository. Replace `<owner>/<repo>` with your GitHub namespace, and optionally pin to a branch, tag, or commit for reproducible builds.
+
+```bash
+# Latest main branch
+npm install "github:<owner>/<repo>"
+
+# Specific tag or release
+npm install "github:<owner>/<repo>#v0.1.0"
+
+# Specific commit
+npm install "github:<owner>/<repo>#<commit-sha>"
+```
+
+Alternatively, reference the GitHub tarball directly in `package.json`:
+
+```json
+{
+	"dependencies": {
+		"react-questionnaire-renderer": "git+https://github.com/<owner>/<repo>.git"
+	}
+}
+```
+
+> **Tip:** After publishing a new release, create a Git tag (e.g., `v0.1.0`) so downstream projects can pin to an immutable snapshot.
+
+For local development against an unpublished build you can use `npm link`:
+
+```bash
+# inside this repository
+npm link
+
+# inside the consuming app
+npm link react-questionnaire-renderer
+```
+
+When you’re ready to ship, remove the `link` and install from GitHub (or npm) to match production wiring.
 
 ### Local development (this repo)
 
@@ -55,6 +96,57 @@ All primary APIs are exposed from `src/index.js`:
 | `normalizeResponses()` | Produces a stable, sorted snapshot of response values. |
 | `serializeResponses()` / `deserializeResponses()` | Convert responses to/from a persisted payload. |
 | `types` | Runtime alias referencing the published TypeScript definitions (see `src/types.d.ts`). |
+
+## Usage
+
+Below is a minimal integration example that loads a questionnaire template and wires up submission, autosave, and runtime helpers. The example assumes the package has been installed via npm, yarn, or a GitHub dependency reference.
+
+```jsx
+import React, { useMemo, useRef } from 'react';
+import QuestionnaireRenderer from 'react-questionnaire-renderer';
+import templateJson from './form/template.json';
+import validationJson from './form/validation.json';
+
+export default function SurveyScreen() {
+	const rendererRef = useRef(null);
+
+	const initialData = useMemo(
+		() => ({ householdHead: 'Jane Doe' }),
+		[]
+	);
+
+	const handleSubmit = async (responses) => {
+		// Persist to your API or storage layer
+		await fetch('/api/submissions', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(responses)
+		});
+	};
+
+	return (
+		<QuestionnaireRenderer
+			ref={rendererRef}
+			templateJson={templateJson}
+			validationJson={validationJson}
+			initialData={initialData}
+			enableAutosave={{ debounceMs: 1500, clearOnSubmit: true }}
+			onChange={(responses) => console.log('draft', responses)}
+			onSubmit={handleSubmit}
+			onValidationError={(errors) => console.warn('validation errors', errors)}
+			layout="default"
+		/>
+	);
+}
+```
+
+Need to trigger submission from outside the component? Use the forwarded ref:
+
+```jsx
+rendererRef.current?.submit();
+```
+
+For custom question components or layout overrides, pass a `componentsMap` or a custom `layout` component—see the props table above for details.
 
 ## `<QuestionnaireRenderer />` Props
 
