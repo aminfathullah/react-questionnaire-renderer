@@ -1,0 +1,796 @@
+{
+  "version" : "0.0.31",
+  "testFunctions" : [ {
+    "dataKey" : "art_tambah",
+    "componentValidation" : [ "art_gabung", "r211" ],
+    "validations" : [ {
+      "test" : "const art = getValue('art_gabung');\n\nconst KRT = art?.map(a => getValue('r211#' + a.value))\n    .filter(a => a?.[0]?.value === '1')\nif (KRT !== undefined)    \n(KRT?.length > 1)",
+      "message" : "Jumlah Kepala keluarga dalam satu keluarga tidak boleh lebih dari 1",
+      "type" : 2
+    }, {
+      "test" : "const art = getValue('art_gabung');\n\nconst KRT = art?.map(a => getValue('r211#' + a.value))\n    .filter(a => a?.[0]?.value === '1')\nif (KRT !== undefined)    \n(KRT?.length < 1)",
+      "message" : "Tidak ada Kepala keluarga dalam keluarga ini",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r211",
+    "componentValidation" : [ "r211@$ROW$", "r210@$ROW$", "r209b@$ROW$" ],
+    "validations" : [ {
+      "test" : "let hubungan = getValue('r211@$ROW$')?.[0].value;\nlet perkawinan = getValue('r210@$ROW$')?.[0].value;\nhubungan == 4 && perkawinan != 2",
+      "message" : "Status hubungan adalah Menantu tetapi Status Perkawinan berkode bukan kawin",
+      "type" : 2
+    }, {
+      "test" : "let hubungan = getValue('r211@$ROW$')?.[0].value;\nlet perkawinan = getValue('r210@$ROW$')?.[0].value;\nhubungan == 1 && perkawinan == 6",
+      "message" : "Status Perkawinan adalah orangtua/mertua tetapi Status hubungan berkode belum kawin",
+      "type" : 2
+    }, {
+      "test" : "let hubungan = getValue('r211@$ROW$')?.[0].value;\nlet umur = getValue('r209b@$ROW$');\n(hubungan == 1 || hubungan == 2 || hubungan == 4 || hubungan == 6) && umur < 10",
+      "message" : "Umur kurang dari 10 tahun tetapi Status hubungan terisi kode 1,2,4 atau 6",
+      "type" : 2
+    }, {
+      "test" : "let hubungan = getValue('r211@$ROW$')?.[0].value;\nlet perkawinan = getValue('r210@$ROW$')?.[0].value;\nhubungan == 2 && perkawinan != 2",
+      "message" : "Status perkawinan untuk suami/istri harus kawin",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r208",
+    "componentValidation" : [ "r205b@$ROW$", "r205c@$ROW$", "r208@$ROW$", "r205a_pre@$ROW$" ],
+    "validations" : [ {
+      "test" : "//R504 = 1 & R505 != 0 & R505  != 9998 & INT(MID(R505,6,1)) >= 8 & INT(MID(R505,6,1)) <= 9 & R506 != 5\t\r\nlet r205b = getValue('r205b@$ROW$'); \r\nlet r205c = String(getValue('r205c@$ROW$')); \r\nlet b = r205c?.substring(6, 7); // (angka pertama, jml digt)\r\nlet r208 = getValue('r208@$ROW$');\r\n\r\nif (r205b?.length > 0 && r208?.length > 0) \r\nr205b[0]?.value == 2 && \r\n(b == '4' || b == '5'  || b == '6'  || b == '7') &&\r\nr208[0]?.value != 2",
+      "message" : "R205 digit ke-7 = 4,5,6,7 tapi R208 tidak isi 2",
+      "type" : 1
+    }, {
+      "test" : "//R504 = 1 & R505 != 0 & R505  != 9998 & INT(MID(R505,6,1)) >= 8 & INT(MID(R505,6,1)) <= 9 & R506 != 5\t\r\nlet r205b = getValue('r205b@$ROW$'); \r\nlet r205c = String(getValue('r205a_pre@$ROW$')); \r\nlet b = r205c?.substring(6, 7); // (angka pertama, jml digt)\r\nlet r208 = getValue('r208@$ROW$');\r\n\r\nif (r205b?.length > 0 && r208?.length > 0) \r\nr205b[0]?.value == 1 && \r\n(b == '4' || b == '5'  || b == '6'  || b == '7') &&\r\nr208[0]?.value != 2",
+      "message" : "R205 digit ke-7 = 4,5,6,7 tapi R208 tidak isi 2",
+      "type" : 1
+    }, {
+      "test" : "//R504 = 1 & R505 != 0 & R505  != 9998 & INT(MID(R505,6,1)) >= 8 & INT(MID(R505,6,1)) <= 9 & R506 != 5\t\r\nlet r205b = getValue('r205b@$ROW$'); \r\nlet r205c = String(getValue('r205c@$ROW$')); \r\nlet b = r205c?.substring(6, 7); // (angka pertama, jml digt)\r\nlet r208 = getValue('r208@$ROW$');\r\n\r\nif (r205b?.length > 0 && r208?.length > 0) \r\nr205b[0]?.value == 2 && \r\n(b == '0' || b == '1'  || b == '2'  || b == '3') &&\r\nr208[0]?.value != 1",
+      "message" : "R205 digit ke-7 = 0,1,2,3 tapi R208 tidak isi 1",
+      "type" : 1
+    }, {
+      "test" : "//R504 = 1 & R505 != 0 & R505  != 9998 & INT(MID(R505,6,1)) >= 8 & INT(MID(R505,6,1)) <= 9 & R506 != 5\t\r\nlet r205b = getValue('r205b@$ROW$'); \r\nlet r205c = String(getValue('r205a_pre@$ROW$')); \r\nlet b = r205c?.substring(6, 7); // (angka pertama, jml digt)\r\nlet r208 = getValue('r208@$ROW$');\r\n\r\nif (r205b?.length > 0 && r208?.length > 0) \r\nr205b[0]?.value == 1 && \r\n(b == '0' || b == '1'  || b == '2'  || b == '3') &&\r\nr208[0]?.value != 1",
+      "message" : "R205 digit ke-7 = 0,1,2,3 tapi R208 tidak isi 1",
+      "type" : 1
+    } ]
+  }, {
+    "dataKey" : "r209_tgl",
+    "componentValidation" : [ "r107_bln@$ROW$", "r107_thn@$ROW$", "r107_tgl@$ROW$" ],
+    "validations" : [ {
+      "test" : "let bulan = getValue('r107_bln@$ROW$');\r\nlet tahun = getValue('r107_thn@$ROW$');// Change this to any Indonesian month name\r\nlet hari = getValue('r107_tgl@$ROW$');\r\n\r\nif (hari != 98) {\r\n    function getDaysInMonth(monthName, year) {\r\n    const months = {\r\n        \"01\": 31,\r\n        \"02\": 28, // Assuming non-leap year by default\r\n        \"03\": 31,\r\n        \"04\": 30,\r\n        \"05\": 31,\r\n        \"06\": 30,\r\n        \"07\": 31,\r\n        \"08\": 31,\r\n        \"09\": 30,\r\n        \"10\": 31,\r\n        \"11\": 30,\r\n        \"12\": 31,\r\n        \"98\": 98\r\n    };\r\n\r\n    // Convert monthName to uppercase for case-insensitive matching\r\n    const uppercaseMonth = monthName.toUpperCase();\r\n\r\n    // Check if the uppercase month name exists in the months object\r\n    if (uppercaseMonth in months) {\r\n        // Check if it's a leap year and update February's days accordingly\r\n        if (uppercaseMonth === \"02\" && year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) {\r\n            return 29;\r\n        } else {\r\n            return months[uppercaseMonth];\r\n        }\r\n    } else {\r\n        // Month name not recognized\r\n        return -1;\r\n    }\r\n}\r\n\r\nconsole.log(bulan?.[0].value);\r\nconst daysInMonth = getDaysInMonth(bulan?.[0].value,tahun ? Number(tahun):0);\r\nhari > daysInMonth;\r\n}\r\n\r\n\r\n\r\n",
+      "message" : "Jumlah hari tidak sama dengan hari kalender",
+      "type" : 2
+    }, {
+      "test" : "let tanggal = getValue(\"r107_tgl@$ROW$\");\nif (tanggal !== undefined && tanggal != 98)\nNumber(tanggal) > 31 && Number(tanggal) < 98;",
+      "message" : "Tanggal lahir harus didalam range",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r209_bln",
+    "componentValidation" : [ "r209_bln", "r209_tgl" ],
+    "validations" : [ {
+      "test" : "let row0 = getRowIndex(0); \nlet bulan = getValue('r209_bln#'+row0)\nlet tanggal = getValue('r209_tgl#'+row0)\nif(bulan?.length > 0)\n((bulan[0].value == 2) &&\nNumber(tanggal) > 29\n);",
+      "message" : "Bulan lahir: Februari tapi Tanggal lahir lebih dari 29",
+      "type" : 2
+    }, {
+      "test" : "let row0 = getRowIndex(0); \nlet bulan = getValue('r209_bln#'+row0)\nlet tanggal = getValue('r209_tgl#'+row0)\nif(bulan?.length > 0)\n((bulan[0].value == 4 ||\n bulan[0].value == 6 ||\n bulan[0].value == 9 ||\n bulan[0].value == 11) &&\nNumber(tanggal) > 30\n);\n\n\n",
+      "message" : "Bulan lahir: April/Juni/September/November tapi Tanggal lahir lebih dari 30",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r209_thn",
+    "componentValidation" : [ "r209_thn", "r209_bln", "r209_tgl", "bln_w", "tgl_w" ],
+    "validations" : [ {
+      "test" : "let row0 = getRowIndex(0); \nlet tahun = getValue('r209_thn#'+row0)\nif(tahun > 0)\n(Number(tahun) < 1900 || Number(tahun) > 2025);\n",
+      "message" : "Range 1900-2025",
+      "type" : 2
+    }, {
+      "test" : "let row0 = getRowIndex(0); \nlet tahun = getValue('r209_thn#'+row0)\nlet bulan = getValue('r209_bln#'+row0)\nlet tanggal = getValue('r209_tgl#'+row0)\nlet bln_w = getValue('bln_w')\nlet tgl_w = getValue('tgl_w')\nif(tahun > 0)\n(Number(tahun) == 2025 && \nbulan[0].value == Number(bln_w) &&\nNumber(tanggal) > Number(tgl_w)\n);\n",
+      "message" : "Tanggal lahir tidak boleh lebih dari Tanggal Pendataan",
+      "type" : 2
+    }, {
+      "test" : "let row0 = getRowIndex(0); \nlet tahun = getValue('r209_thn#'+row0)\nlet bulan = getValue('r209_bln#'+row0)\nlet tanggal = getValue('r209_tgl#'+row0)\nif( tahun > 0) \ntahun % 4 != 0  && bulan[0].value == 2 && Number(tanggal) > 28\n",
+      "message" : "Tahun lahir bukan tahun kabisat, tapi Tanggal lahir lebih dari 28",
+      "type" : 2
+    }, {
+      "test" : "let row0 = getRowIndex(0); \nlet tahun = getValue('r209_thn#'+row0)\nlet bulan = getValue('r209_bln#'+row0)\nlet tanggal = getValue('r209_tgl#'+row0)\nlet bln_w = getValue('bln_w')\nlet tgl_w = getValue('tgl_w')\nif(tahun > 0)\n(Number(tahun) == 2025 && \nbulan[0].value > 7\n);\n",
+      "message" : "Bulan lahir tidak boleh lebih dari Bulan Juli",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r210",
+    "componentValidation" : [ "r209b@$ROW$", "r210@$ROW$" ],
+    "validations" : [ {
+      "test" : "let umur = getValue('r209b@$ROW$')?Number(getValue('r209b@$ROW$')?.[0]?.value) :0;\nlet kawin = getValue('r210@$ROW$')?Number(getValue('r210@$ROW$')?.[0]?.value) :0;\n\numur >= 10 && kawin === 0;",
+      "message" : "Jika rincian 209b berumur 10 tahun ke atas maka rincian 210 harus isi",
+      "type" : 2
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet kawin = getValue('r210@$ROW$');\nif(umur !== undefined && kawin != undefined ) \n    ((Number(getValue('r209b@$ROW$')) < 10) && (kawin?.[0]?.value != '1') )  ;",
+      "message" : "Jika rincian 209b berumur kurang dari 10 tahun maka rincian 210 berkode  1",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r226",
+    "componentValidation" : [ "r226@$ROW$" ],
+    "validations" : [ {
+      "test" : "let r226 = getValue('r226@$ROW$'); \nvar deskripsi1 = []; \nvar deskripsi2 = []; \n\nif (r226 !== '' && r226.length > 0) \n{ \n    deskripsi1 = r226.filter((a => a.value == '1'));\n    deskripsi2 = r226.filter((a => a.value == '4'));\n    deskripsi1.length > 0 && deskripsi2.length > 0 \n}",
+      "message" : "Tidak memiliki disabilitas tidak boleh dipilih bersamaan dengan Disabilitas Inteletual",
+      "type" : 2
+    }, {
+      "test" : "let r226 = getValue('r226@$ROW$'); \nvar deskripsi1 = []; \nvar deskripsi2 = []; \n\nif (r226 !== '' && r226.length > 0) \n{ \n    deskripsi1 = r226.filter((a => a.value == '1'));\n    deskripsi2 = r226.filter((a => a.value == '7'));\n    deskripsi1.length > 0 && deskripsi2.length > 0 \n}",
+      "message" : "Tidak memiliki disabilitas tidak boleh dipilih bersamaan dengan Disabilitas Wicara",
+      "type" : 2
+    }, {
+      "test" : "let r226 = getValue('r226@$ROW$'); \nvar deskripsi1 = []; \nvar deskripsi2 = []; \n\nif (r226 !== '' && r226.length > 0) \n{ \n    deskripsi1 = r226.filter((a => a.value == '1'));\n    deskripsi2 = r226.filter((a => a.value == '2'));\n    deskripsi1.length > 0 && deskripsi2.length > 0 \n}",
+      "message" : "Tidak memiliki disabilitas tidak boleh dipilih bersamaan dengan Disabilitas Fisik",
+      "type" : 2
+    }, {
+      "test" : "let r226 = getValue('r226@$ROW$'); \nvar deskripsi1 = []; \nvar deskripsi2 = []; \n\nif (r226 !== '' && r226.length > 0) \n{ \n    deskripsi1 = r226.filter((a => a.value == '1'));\n    deskripsi2 = r226.filter((a => a.value == '6'));\n    deskripsi1.length > 0 && deskripsi2.length > 0 \n}",
+      "message" : "Tidak memiliki disabilitas tidak boleh dipilih bersamaan dengan Disabilitas Sensorik Rungu",
+      "type" : 2
+    }, {
+      "test" : "let r226 = getValue('r226@$ROW$'); \nvar deskripsi1 = []; \nvar deskripsi2 = []; \n\nif (r226 !== '' && r226.length > 0) \n{ \n    deskripsi1 = r226.filter((a => a.value == '1'));\n    deskripsi2 = r226.filter((a => a.value == '5'));\n    deskripsi1.length > 0 && deskripsi2.length > 0 \n}",
+      "message" : "Tidak memiliki disabilitas tidak boleh dipilih bersamaan dengan Disabilitas Sensorik Netra",
+      "type" : 2
+    }, {
+      "test" : "let r226 = getValue('r226@$ROW$'); \nvar deskripsi1 = []; \nvar deskripsi2 = []; \n\nif (r226 !== '' && r226.length > 0) \n{ \n    deskripsi1 = r226.filter((a => a.value == '1'));\n    deskripsi2 = r226.filter((a => a.value == '3'));\n    deskripsi1.length > 0 && deskripsi2.length > 0 \n}",
+      "message" : "Tidak memiliki disabilitas tidak boleh dipilih bersamaan dengan Disabilitas Mental",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r213",
+    "componentValidation" : [ "r209b@$ROW$", "r212@$ROW$", "r213@$ROW$" ],
+    "validations" : [ {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\numur < 15 && (sekolah == 2 || sekolah == 3) && \n(jenjang == '11' || jenjang == '12')\n",
+      "message" : "Rincian 209b kurang dari 15 tahun, rincian 212 = 2 atau 3 tapi r213 = 11 atau 12",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\numur < 17 && sekolah == 3 && \n(jenjang == '18' || jenjang == '19')\n",
+      "message" : "Rincian 209b kurang dari 17 tahun, rincian 212 = 3 tapi r213 = 18 atau 19",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\numur < 12 && (sekolah == 2 || sekolah == 3) && \n(jenjang == '06' || jenjang == '07')",
+      "message" : "Rincian 209b kurang dari 12 tahun, rincian 212 = 2 atau 3 tapi r213 = 6 atau 7",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\n(umur < 14 || umur > 20 ) && sekolah == 2 && \n(jenjang == '15' || jenjang == '16' || jenjang == '17')\n",
+      "message" : "Rincian 209b kurang dari 14 atau lebih dari 20 tahun, rincian 212 = 2 tapi r213 = 15 - 17",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\n(umur < 20 || umur > 50 ) && sekolah == 2 && jenjang == '20'\n",
+      "message" : "Rincian 209b kurang dari 20 atau lebih dari 50 tahun, rincian 212 = 2 tapi r213 = 20",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\n(umur < 11 || umur > 16) && sekolah == 2 && \n(jenjang == '08' || jenjang == '09' || jenjang == '10')\n",
+      "message" : "Rincian 209b kurang dari 11 atau lebih dari 16 tahun, rincian 212 = 2 tapi r213 = 8 -10",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\numur < 6 && (sekolah == 2 || sekolah == 3) && \n(jenjang == '01' || jenjang == '02')\n",
+      "message" : "Rincian 209b kurang dari 6 tahun, rincian 212 = 2 atau 3 tapi r213 = 1 atau 2",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\numur < 20 && sekolah == 3 && jenjang == '20'\n",
+      "message" : "Rincian 209b kurang dari 20 tahun, rincian 212 = 3 tapi r213 = 20",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\numur < 14 && sekolah == 3 && \n(jenjang == '13' || jenjang == '14' || jenjang == '15' || jenjang == '16' || jenjang == '17')\n",
+      "message" : "Rincian 209b kurang dari 14 tahun, rincian 212 = 3 tapi r213 = 13 - 17",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\numur < 21 && sekolah == 3 && jenjang == '22'\n",
+      "message" : "Rincian 209b kurang dari 21 tahun, rincian 212 = 3 tapi r213 = 22",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\n(umur < 17 || umur > 50 ) && sekolah == 2 && (jenjang == '18' || jenjang == '19')\n",
+      "message" : "Rincian 209b kurang dari 17 atau lebih dari 50 tahun, rincian 212 = 2 tapi r213 = 18 atau 19",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\numur < 20 && sekolah == 3 && jenjang == '21'\n",
+      "message" : "Rincian 209b kurang dari 20 tahun, rincian 212 = 3 tapi r213 = 21",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\numur < 13 && sekolah == 2 && \n(jenjang == '03' || jenjang == '04' || jenjang == '05')\n",
+      "message" : "Rincian 209b kurang dari 13 tahun, rincian 212 = 2 tapi r213 = 3 - 5",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\n(umur < 20 || umur > 65 ) && sekolah == 2 && jenjang == '21'\n",
+      "message" : "Rincian 209b kurang dari 20 atau lebih dari 65 tahun, rincian 212 = 2 tapi r213 = 21",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\n(umur < 14 || umur > 19 ) && sekolah == 2 && \n(jenjang == '13' || jenjang == '14' || jenjang == '17')\n",
+      "message" : "Rincian 209b kurang dari 14 atau lebih dari 19 tahun, rincian 212 = 2 tapi r213 = 13 atau 14 atau 17",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\n(umur < 21 || umur > 65 ) && sekolah == 2 && jenjang == '22'\n",
+      "message" : "Rincian 209b kurang dari 21 atau lebih dari 65 tahun, rincian 212 = 2 tapi r213 = 22",
+      "type" : 1
+    }, {
+      "test" : "let umur = getValue('r209b@$ROW$');\nlet sekolah = getValue('r212@$ROW$')?.[0].value;\nlet jenjang = getValue('r213@$ROW$')?.[0].value;\numur < 11 && sekolah == 3 && \n(jenjang == '08' || jenjang == '09' || jenjang == '10')\n",
+      "message" : "Rincian 209b kurang dari 11 tahun, rincian 212 = 3 tapi r213 = 8 - 10",
+      "type" : 1
+    } ]
+  }, {
+    "dataKey" : "r214",
+    "componentValidation" : [ "r209b@$ROW$", "r212@$ROW$", "r213@$ROW$", "r214@$ROW$", "r215@$ROW$" ],
+    "validations" : [ {
+      "test" : "let a = 30;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 13 && (r212 == 2 || r212 == 3) && (Number(r213) == 6 || Number(r213) == 7) && r214 == 2\n",
+      "message" : "r209b berumur dibawah 13 dan r213 = 6 atau 7 tapi r214 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 54;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 20 || r209b  > 50) && r212 == 2 && Number(r213) == 20 && r214 == 1\r\n",
+      "message" : "r209b berumur dibawah 20 atau di atas 50 dan r212 = 2 dan r213 = 20 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "let a = 71;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && (Number(r213) == 13 || Number(r213) == 14) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) == 7\r\n",
+      "message" : "r212 = 2 dan r213 = 13 atau 14 dan r214 = 1 - 3 tapi r215 = 7",
+      "type" : 1
+    }, {
+      "test" : "let a = 43;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 14 || r209b  > 17) && r212 == 2 && (Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 15 || Number(r213) == 16 || Number(r213) == 17) && r214 == 1\r\n",
+      "message" : "r209b berumur dibawah 14 atau di atas 17 dan r212 = 2 dan r213 = 13 s.d 17 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "let a = 81;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 18 || Number(r213) == 19) && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4 || r214 == 5) && Number(r215) == 12\r\n",
+      "message" : "r212 = 3 dan r213 = 18 atau 19 dan r214 = 1 - 5 tapi r215 = 12",
+      "type" : 1
+    }, {
+      "test" : "let a = 50;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 17 && r212 == 3 && (Number(r213) == 15 || Number(r213) == 16 || Number(r213) == 17) && r214 == 4\r\n",
+      "message" : "r209b berumur dibawah 17 dan r212 = 3 dan r213 = 15 atau 17 tapi r214 = 4",
+      "type" : 1
+    }, {
+      "test" : "let a = 72;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && (Number(r213) == 15 || Number(r213) == 16 || Number(r213) == 17) && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4) && Number(r215) == 7\r\n",
+      "message" : "r212 = 2 dan r213 = 15 - 17 dan r214 = 1 - 4 tapi r215 = 7",
+      "type" : 1
+    }, {
+      "test" : "let a = 82;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 19 && r212 == 3 && r213 == 18  && r214 == 8\r\n",
+      "message" : "r209b berumur dibawah 19, r212 = 3, r213 = 18 tapi r214 = 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 49;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 16 && r212 == 3 && (Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 15 || Number(r213) == 16 || Number(r213) == 17) && (r214 == 3 || r214 == 8)\r\n",
+      "message" : "r209b berumur dibawah 16 dan r212 = 3 dan r213 = 13 atau 17 tapi r214 = 3 atau 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 18;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\n(r209b  < 5 || r209b  > 8) && r212 == 2 && (Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && r214 == 1",
+      "message" : "r209b berumur dibawah 5 atau di atas 8 dan r212 = 2 dan r213 = 3 - 5 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "let a = 38;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 13 && r212 == 3 && (Number(r213) == 8 || Number(r213) == 9) && (r214 == 3 || r214 == 8)\r\n",
+      "message" : "r209b berumur dibawah 13 dan r212 = 3 dan r213 = 8 atau 9 tapi r214 = 3 atau 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 29;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 12 && (r212 == 2 || r212 == 3) && (Number(r213) == 6 || Number(r213) == 7) && r214 == 1\n",
+      "message" : "r209b berumur dibawah 12 dan r213 = 6 atau 7 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "\r\nlet a = 62;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 17 && r212 == 3 && Number(r213) == 18 && r214 == 8\r\n",
+      "message" : "r209b berumur dibawah 17 dan r212 = 3 dan r213 = 18 tapi r214 = 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 75;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 20 && r214 == 1 && (Number(r215) == 20 || Number(r215) == 21 || Number(r215) == 22)\r\n",
+      "message" : "r212 = 2 dan r213 = 20 dan r214 = 1 tapi r215 = 20 - 22",
+      "type" : 1
+    }, {
+      "test" : "let a = 63;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 20 && r212 == 3 && Number(r213) == 19 && r214 == 8\r\n",
+      "message" : "r209b berumur dibawah 20 dan r212 = 3 dan r213 = 19 tapi r214 = 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 69;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 22 && r212 == 3 && Number(r213) == 22 && r214 == 8\r\n",
+      "message" : "r209b berumur dibawah 21 dan r212 = 3 dan r213 = 22 tapi r214 = 7",
+      "type" : 1
+    }, {
+      "test" : "let a = 56;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 21 || r209b  > 50) && r212 == 2 && Number(r213) == 19 && r214 == 5\r\n",
+      "message" : "r209b berumur dibawah 21 atau di atas 50 dan r212 = 2 dan r213 = 19 tapi r214 = 5",
+      "type" : 1
+    }, {
+      "test" : "let a = 27;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 9 && r212 == 3 && (Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && r214 == 5\n",
+      "message" : "r209b berumur dibawah 9 dan r212 = 3 dan r213 = 3 - 5 tapi r214 = 5",
+      "type" : 1
+    }, {
+      "test" : "let a = 52;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 18 || r209b  > 50) && r212 == 2 && (Number(r213) == 18 || Number(r213) == 19) && r214 == 2\r\n",
+      "message" : "r209b berumur dibawah 18 atau di atas 50 dan r212 = 2 dan r213 = 18 atau 19 tapi r214 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 78;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 6 || Number(r213) == 8 || Number(r213) == 9) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) == 2\r\n",
+      "message" : "r212 = 3 dan r213 = 6 atau 8 atau 9 dan r214 = 1 - 3 tapi r215 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 51;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 17 || r209b  > 50) && r212 == 2 && (Number(r213) == 18 || Number(r213) == 19) && r214 == 1\r\n",
+      "message" : "r209b berumur dibawah 17 atau di atas 50 dan r212 = 2 dan r213 = 18 atau 19 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "let a = 77;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 22 && r214 == 7 && Number(r215) == 22\r\n",
+      "message" : "r212 = 2 dan r213 = 22 dan r214 = 7 tapi r215 = 22",
+      "type" : 1
+    }, {
+      "test" : "\r\nlet a = 68;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 21 && r212 == 3 && Number(r213) == 22 && r214 == 7\r\n",
+      "message" : "r209b berumur dibawah 21 dan r212 = 3 dan r213 = 22 tapi r214 = 7",
+      "type" : 1
+    }, {
+      "test" : "let a = 46;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 17 || r209b  > 20) && r212 == 2 && (Number(r213) == 13 || Number(r213) == 14) && r214 == 4\r\n",
+      "message" : "r209b berumur dibawah 17 atau di atas 20 dan r212 = 2 dan r213 = 13 atau 14 tapi r214 = 4",
+      "type" : 1
+    }, {
+      "test" : "let a = 14;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 9 && (r212 == 2 || r212 == 3) && (Number(r213) == 1 || Number(r213) == 2) && r214 == 4",
+      "message" : "r209b berumur dibawah 9 dan r213 = 1 atau 2 tapi r214 = 4",
+      "type" : 1
+    }, {
+      "test" : "let a = 24;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 6 && r212 == 3 && (Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && r214 == 2\n",
+      "message" : "r209b berumur dibawah 6 dan r212 = 3 dan r213 = 3 - 5 tapi r214 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 67;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 21 && r209b  > 65 && r212 == 2 && Number(r213) == 22 && r214 == 7\r\n",
+      "message" : "r209b berumur dibawah 21 dan di atas 65 dan r212 = 2 dan r213 = 22 tapi r214 = 7",
+      "type" : 1
+    }, {
+      "test" : "let a = 13;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 8 && (r212 == 2 || r212 == 3) && (Number(r213) == 1 || Number(r213) == 2) && r214 == 3",
+      "message" : "r209b berumur dibawah 8 dan r213 = 1 atau 2 tapi r214 = 3",
+      "type" : 1
+    }, {
+      "test" : "let a = 40;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 16 && (r212 == 2 || r212 == 3) && (Number(r213) == 11 || Number(r213) == 12) && r214 == 2\r\n",
+      "message" : "r209b berumur dibawah 16 dan r213 = 11 atau 12 tapi r214 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 47;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 14 && r212 == 3 && (Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 15 || Number(r213) == 16 || Number(r213) == 17) && r214 == 1\r\n",
+      "message" : "r209b berumur dibawah 14 dan r212 = 3 dan r213 = 13 atau s.d 17 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "let a = 83;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 20 && r212 == 3 && r213 == 19  && r214 == 8\r\n",
+      "message" : "r209b berumur dibawah 20, r212 = 3, r213 = 19 tapi r214 = 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 25;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 7 && r212 == 3 && (Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && r214 == 3\n",
+      "message" : "r209b berumur dibawah 7 dan r212 = 3 dan r213 = 3 - 5 tapi r214 = 3",
+      "type" : 1
+    }, {
+      "test" : "let a = 33;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 11 || r209b  > 14) && r212 == 2 && (Number(r213) == 8 || Number(r213) == 9) && r214 == 1\r\n\r\n",
+      "message" : "r209b berumur dibawah 11 atau di atas 14 dan r212 = 2 dan r213 = 8 atau 9 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "let a = 12;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;r209b  < 7 && (r212 == 2 || r212 == 3) && (Number(r213) == 1 || Number(r213) == 2) && r214 == 2",
+      "message" : "r209b berumur dibawah 7 dan r213 = 1 atau 2 tapi r214 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 11;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 6 && (r212 == 2 || r212 == 3) && (Number(r213) == 1 || Number(r213) == 2) && r214 == 1",
+      "message" : "r209b berumur dibawah 6 dan r213 = 1 atau 2 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "let a = 15;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 10 && (r212 == 2 || r212 == 3) && (Number(r213) == 1 || Number(r213) == 2) && r214 == 5",
+      "message" : "r209b berumur dibawah 10 dan r213 = 1 atau 2 tapi r214 = 5",
+      "type" : 1
+    }, {
+      "test" : "let a = 73;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 18 && (r214 == 1 || r214 == 2 || r214 == 3) && (Number(r215) == 12 || Number(r215) == 18)\r\n",
+      "message" : "r212 = 2 dan r213 = 18 dan r214 = 1 - 3 tapi r215 = 12 atau 18",
+      "type" : 1
+    }, {
+      "test" : "let a = 59;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 19 && r212 == 3 && Number(r213) == 19 && r214 == 3\r\n",
+      "message" : "r209b berumur dibawah 19 dan r212 = 3 dan r213 = 19 tapi r214 = 3",
+      "type" : 1
+    }, {
+      "test" : "let a = 44;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 15 || r209b  > 18) && r212 == 2 && (Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 15 || Number(r213) == 16 || Number(r213) == 17) && r214 == 2\r\n",
+      "message" : "r209b berumur dibawah 15 atau di atas 18 dan r212 = 2 dan r213 = 13 atau s.d 17 tapi r214 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 31;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 14 && (r212 == 2 || r212 == 3) && (Number(r213) == 6 || Number(r213) == 7) && r214 == 3\n",
+      "message" : "r209b berumur dibawah 14 dan r213 = 6 atau 7 tapi r214 = 3",
+      "type" : 1
+    }, {
+      "test" : "let a = 23;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\n(r209b  < 10 || r209b  > 13) && r212 == 2 && (Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && r214 == 6\n",
+      "message" : "r209b berumur dibawah 10 atau di atas 13 dan r212 = 2 dan r213 = 3 - 5 tapi r214 = 6",
+      "type" : 1
+    }, {
+      "test" : "let a = 26;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 8 && r212 == 3 && (Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && r214 == 4\n",
+      "message" : "r209b berumur dibawah 8 dan r212 = 3 dan r213 = 3 - 5 tapi r214 = 4",
+      "type" : 1
+    }, {
+      "test" : "let a = 39;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 15 && (r212 == 2 || r212 == 3) && (Number(r213) == 11 || Number(r213) == 12) && r214 == 1\r\n",
+      "message" : "r209b berumur dibawah 15 dan r213 = 11 atau 12 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "let a = 35;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 13 || r209b  > 16) && r212 == 2 && (Number(r213) == 8 || Number(r213) == 9) && r214 == 3\r\n",
+      "message" : "r209b berumur dibawah 13 atau di atas 16 dan r212 = 2 dan r213 = 8 atau 9 tapi r214 = 3",
+      "type" : 1
+    }, {
+      "test" : "let a = 60;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 20 && r212 == 3 && Number(r213) == 20 && r214 == 8\r\n",
+      "message" : "r209b berumur dibawah 20 dan r212 = 3 dan r213 = 20 tapi r214 = 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 61;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 20 && r212 == 3 && Number(r213) == 19 && r214 == 4\r\n",
+      "message" : "r209b berumur dibawah 20 dan r212 = 3 dan r213 = 19 tapi r214 = 4",
+      "type" : 1
+    }, {
+      "test" : "let a = 34;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 12 || r209b  > 15) && r212 == 2 && (Number(r213) == 8 || Number(r213) == 9) && r214 == 2\r\n",
+      "message" : "r209b berumur dibawah 12 atau di atas 15 dan r212 = 2 dan r213 = 8 atau 9 tapi r214 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 65;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 20 && r212 == 3 && Number(r213) == 21 && r214 == 6\r\n",
+      "message" : "r209b berumur dibawah 20 dan r212 = 3 dan r213 = 21 tapi r214 = 6",
+      "type" : 1
+    }, {
+      "test" : "let a = 28;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 10 && r212 == 3 && (Number(r213) == 3 || Number(r213) == 4) && (r214 == 6 || r214 == 8)\n",
+      "message" : "r209b berumur dibawah 10 dan r212 = 3 dan r213 = 3 atau 4 tapi r214 = 6 atau 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 57;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 17 && r212 == 3 && Number(r213) == 18 && r214 == 1\r\n",
+      "message" : "r209b berumur dibawah 17 dan r212 = 3 dan r213 = 18 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "let a = 42;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 17 && r212 == 3 && (Number(r213) == 11 || Number(r213) == 12) && r214 == 8\r\n",
+      "message" : "r209b berumur dibawah 17 dan r212 = 3 dan r213 = 11 atau 12 tapi r214 = 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 37;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 12 && r212 == 3 && (Number(r213) == 8 || Number(r213) == 9) && r214 == 2\r\n\r\n",
+      "message" : "r209b berumur dibawah 12 dan r212 = 3 dan r213 = 8 atau 9 tapi r214 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 48;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 15 && r212 == 3 && (Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 15 || Number(r213) == 16 || Number(r213) == 17) && r214 == 2\r\n",
+      "message" : "r209b berumur dibawah 15 dan r212 = 3 dan r213 = 13 atau s.d 17 tapi r214 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 22;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\n(r209b  < 9 || r209b  > 12) && r212 == 2 && (Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && r214 == 5\n",
+      "message" : "r209b berumur dibawah 9 atau di atas 12 dan r212 = 2 dan r213 = 3 - 5 tapi r214 = 5",
+      "type" : 1
+    }, {
+      "test" : "let a = 36;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 11 && r212 == 3 && (Number(r213) == 8 || Number(r213) == 9) && r214 == 1\r\n",
+      "message" : "r209b berumur dibawah 11 dan r212 = 3 dan r213 = 8 atau 9 tapi r214 = 1",
+      "type" : 1
+    }, {
+      "test" : "let a = 79;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 11 || Number(r213) == 13 || Number(r213) == 14) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) == 7\r\n",
+      "message" : "r212 = 3 dan r213 = 11 atau 13 atau 14 dan r214 = 1 - 3 tapi r215 = 7",
+      "type" : 1
+    }, {
+      "test" : "let a = 55;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 20 || r209b  > 50) && r212 == 2 && Number(r213) == 19 && r214 == 4\r\n",
+      "message" : "r209b berumur dibawah 20 atau di atas 50 dan r212 = 2 dan r213 = 19 tapi r214 = 4",
+      "type" : 1
+    }, {
+      "test" : "let a = 41;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 17 && (r212 == 2 || r212 == 3) && (Number(r213) == 11 || Number(r213) == 12) && r214 == 3\r\n",
+      "message" : "r209b berumur dibawah 17 dan r213 = 11 atau 12 tapi r214 = 3",
+      "type" : 1
+    }, {
+      "test" : "let a = 45;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 16 || r209b  > 19) && r212 == 2 && (Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 15 || Number(r213) == 16 || Number(r213) == 17) && r214 == 3\r\n",
+      "message" : "r209b berumur dibawah 16 atau di atas 19 dan r212 = 2 dan r213 = 13 atau s.d 17 tapi r214 = 3",
+      "type" : 1
+    }, {
+      "test" : "let a = 70;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && (Number(r213) == 8 || Number(r213) == 9) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) == 2\r\n",
+      "message" : "r212 = 2 dan r213 = 8 atau 9 dan r214 = 1 - 3 tapi r215 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 74;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 19 && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4 || r214 == 5) && (Number(r215) == 12 || Number(r215) == 19 || Number(r215) == 20 || Number(r215) == 21 || Number(r215) == 22)\r\n",
+      "message" : "r212 = 2 dan r213 = 19 dan r214 = 1 - 5 tapi r215 = 12 atau 19 - 22",
+      "type" : 1
+    }, {
+      "test" : "\r\nlet a = 64;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 20 || r209b  > 65) && r212 == 2 && Number(r213) == 21 && r214 == 6\r\n",
+      "message" : "r209b berumur dibawah 20 atau di atas 65 dan r212 = 2 dan r213 = 21 tapi r214 = 6",
+      "type" : 1
+    }, {
+      "test" : "let a = 80;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 15 || Number(r213) == 16) && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4) && Number(r215) == 7\r\n",
+      "message" : "r212 = 3 dan r213 = 15 atau 16 dan r214 = 1 - 4 tapi r215 = 7",
+      "type" : 1
+    }, {
+      "test" : "let a = 20;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\n(r209b  < 7 || r209b  > 10) && r212 == 2 && (Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && r214 == 3\n",
+      "message" : "r209b berumur dibawah 7 atau di atas 10 dan r212 = 2 dan r213 = 3 - 5 tapi r214 = 3",
+      "type" : 1
+    }, {
+      "test" : "let a = 58;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 18 && r212 == 3 && Number(r213) == 18 && r214 == 2\r\n",
+      "message" : "r209b berumur dibawah 18 dan r212 = 3 dan r213 = 18 tapi r214 = 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 76;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 21 && r214 == 6 && (Number(r215) == 21 || Number(r215) == 22)\r\n",
+      "message" : "r212 = 2 dan r213 = 21 dan r214 = 6 tapi r215 = 21 atau 22",
+      "type" : 1
+    }, {
+      "test" : "let a = 53;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\n(r209b  < 19 || r209b  > 50) && r212 == 2 && Number(r213) == 18 && r214 == 3\r\n",
+      "message" : "r209b berumur dibawah 19 atau di atas 50 dan r212 = 2 dan r213 = 18 tapi r214 = 3",
+      "type" : 1
+    }, {
+      "test" : "let a = 32;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 14 && r212 == 3 && (Number(r213) == 6 || Number(r213) == 7) && r214 == 8\n",
+      "message" : "r209b berumur dibawah 14 dan r212 = 3 dan r213 = 6 atau 7 tapi r214 = 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 17;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 11 && r212 == 3 && (Number(r213) == 1 || Number(r213) == 2) && r214 == 8",
+      "message" : "r209b berumur dibawah 11 dan r212 = 3 dan r213 = 1 atau 2 tapi r214 = 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 21;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\n(r209b  < 8 || r209b  > 11) && r212 == 2 && (Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && r214 == 4\n",
+      "message" : "r209b berumur dibawah 8 atau di atas 11 dan r212 = 2 dan r213 = 3 - 5 tapi r214 = 4",
+      "type" : 1
+    }, {
+      "test" : "let a = 16;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\nr209b  < 11 && (r212 == 2 || r212 == 3) && (Number(r213) == 1 || Number(r213) == 2) && r214 == 6",
+      "message" : "r209b berumur dibawah 11 dan r213 = 1 atau 2 tapi r214 = 6",
+      "type" : 1
+    }, {
+      "test" : "\r\nlet a = 66;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nr209b  < 21 && r212 == 3 && Number(r213) == 21 && r214 == 8\r\n",
+      "message" : "r209b berumur dibawah 21 dan r212 = 3 dan r213 = 21 tapi r214 = 8",
+      "type" : 1
+    }, {
+      "test" : "let a = 19;\nlet r209b = getValue('r209b@$ROW$');\nlet r212 = getValue('r212@$ROW$')?.[0].value;\nlet r213 = getValue('r213@$ROW$')?.[0].value;\nlet r214 = getValue('r214@$ROW$')?.[0].value;\n(r209b  < 6 || r209b  > 9) && r212 == 2 && (Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && r214 == 2\n",
+      "message" : "r209b berumur dibawah 6 atau di atas 9 dan r212 = 2 dan r213 = 3 - 5 tapi r214 = 2",
+      "type" : 1
+    } ]
+  }, {
+    "dataKey" : "r215",
+    "componentValidation" : [ "r209b@$ROW$", "r212@$ROW$", "r213@$ROW$", "r214@$ROW$", "r215@$ROW$" ],
+    "validations" : [ {
+      "test" : "\r\nlet a = 59;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 15 || Number(r213) == 16) && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4) && Number(r215) == 7\r\n",
+      "message" : "r212 = 3, r213 = 15 atau 16, r214 = 1 - 4 tetapi r215 terisi 7",
+      "type" : 1
+    }, {
+      "test" : "\r\nlet a = 33;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 18 && r214 == 8 && Number(r215) !== 18\r\n",
+      "message" : "r212 = 3, r213 = 18, r214 = 8 tetapi r215 terisi selain 18",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 43;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 18 && (r214 == 1 || r214 == 2) && (Number(r215) < 11  || Number(r215) > 17)\r\n",
+      "message" : "r212 = 3, r213 = 18, r214 = 1 atau 2 tetapi r215 terisi kurang dari 11 dan lebih dari 17",
+      "type" : 2
+    }, {
+      "test" : "let a = 30;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 16 && r214 == 8 && (Number(r215) !== 11 && Number(r215) !== 16)",
+      "message" : "r212 = 3, r213 = 16, r214 = 8 tetapi r215 terisi selain 11 atau 16",
+      "type" : 2
+    }, {
+      "test" : "let a = 60;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 18 || Number(r213) == 19) && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4 || r214 == 5) && Number(r215) == 12\r\n",
+      "message" : "r212 = 3, r213 = 18 atau 19, r214 = 1 - 5 tetapi r215 terisi 12",
+      "type" : 1
+    }, {
+      "test" : "let a = 54;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 20 && r214 == 1 && (Number(r215) == 20 || Number(r215) == 21 || Number(r215) == 22)\r\n",
+      "message" : "r212 = 2, r213 = 20, r214 = 1 tetapi r215 terisi 20 - 22",
+      "type" : 1
+    }, {
+      "test" : "let a = 52;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 19 && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4) && (Number(r215) == 12 || Number(r215) == 19 || Number(r215) == 20 || Number(r215) == 21 || Number(r215) == 22)\r\n",
+      "message" : "r212 = 2, r213 = 19, r214 = 1 - 4 tetapi r215 terisi 12 atau 19 - 22",
+      "type" : 1
+    }, {
+      "test" : "let a = 7;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 19 && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4 || r214 == 5) && (Number(r215) < 11 || Number(r215) > 22)\r\n",
+      "message" : "r212 = 2, r213 = 19, r214 = 1 - 5 tetapi r215 terisi kurang dari 11 atau diatas 22",
+      "type" : 2
+    }, {
+      "test" : "let a = 44;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 18 && r214 == 8 && Number(r215) !== 18\r\n",
+      "message" : "r212 = 3, r213 = 18, r214 = 8 tetapi r215 terisi selain 18",
+      "type" : 2
+    }, {
+      "test" : "let a = 8;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 20 && r214 == 1 && (Number(r215) < 19 || Number(r215) == 23)\r\n",
+      "message" : "r212 = 2, r213 = 20, r214 = 1 tetapi r215 terisi kurang dari 19 dan 23",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 21;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 9 && r214 == 8 && (Number(r215) !== 6 && Number(r215) !== 9)\r\n",
+      "message" : "r212 = 3, r213 = 9, r214 = 8 tetapi r215 terisi selain 6 atau 9",
+      "type" : 2
+    }, {
+      "test" : "let a = 14;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 3 && r214 == 8 && (Number(r215) !== 1 && Number(r215) !== 3)\r\n",
+      "message" : "r212 = 3, r213 = 3, r214 = 8 tetapi r215 terisi selain 1 atau 3",
+      "type" : 2
+    }, {
+      "test" : "let a = 48;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && (Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 17) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) == 7\r\n",
+      "message" : "r212 = 2, r213 = 13 atau 14 atau 17, r214 = 1 - 3 tetapi r215 terisi 7",
+      "type" : 1
+    }, {
+      "test" : "\r\nlet a = 55;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 21 && r214 == 6 && (Number(r215) == 21 || Number(r215) == 22)\r\n",
+      "message" : "r212 = 2, r213 = 21, r214 = 6 tetapi r215 terisi 21 - 22",
+      "type" : 1
+    }, {
+      "test" : "let a = 16;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 5 && r214 == 8 && (Number(r215) !== 1 && Number(r215) !== 5)\r\n",
+      "message" : "r212 = 3, r213 = 5, r214 = 8 tetapi r215 terisi selain 1 atau 5",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 36;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 20 && r214 == 1 && (Number(r215) <19 || Number(r215) >19)\r\n",
+      "message" : "r212 = 3, r213 = 20, r214 = 1 tetapi r215 terisi kurang dari 19 dan di atas 19",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 19;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 7 && r214 == 8 && (Number(r215) !== 6 && Number(r215) !== 7)\r\n",
+      "message" : "r212 = 3, r213 = 7, r214 = 8 tetapi r215 terisi selain 6 atau 7",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 9;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 21 && r214 == 6 && (Number(r215) < 19 || Number(r215) > 22)\r\n",
+      "message" : "r212 = 2, r213 = 21, r214 = 6 tetapi r215 terisi kurang dari 19 atau lebih dari 22",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 49;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\n(Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 17) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) == 7\r\n",
+      "message" : "r212 = 2, r213 = 15 atau 16, r214 = 1 - 4 tetapi r215 terisi 7",
+      "type" : 1
+    }, {
+      "test" : "\r\nlet a = 41;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 22 && r214 == 8 && Number(r215) !== 22\r\n",
+      "message" : "r212 = 3, r213 = 22, r214 = 8 tetapi r215 terisi selain 22",
+      "type" : 2
+    }, {
+      "test" : "let a = 31;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 17 && r214 == 8 && (Number(r215) !== 11 && Number(r215) !== 17)",
+      "message" : "r212 = 3, r213 = 17, r214 = 8 tetapi r215 terisi selain 11 atau 17",
+      "type" : 2
+    }, {
+      "test" : "let a = 18;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 6 && r214 == 8 && Number(r215) !== 6\r\n",
+      "message" : "r212 = 3, r213 = 6, r214 = 8 tetapi r215 terisi selain 6",
+      "type" : 2
+    }, {
+      "test" : "let a = 46;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 19 && r214 == 8 && Number(r215) !== 19\r\n",
+      "message" : "r212 = 3, r213 = 19, r214 = 8 tetapi r215 terisi selain 19",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 39;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 21 && r214 == 8 && Number(r215) !== 21\r\n",
+      "message" : "r212 = 3, r213 = 21, r214 = 8 tetapi r215 terisi selain 21",
+      "type" : 2
+    }, {
+      "test" : "let a = 25;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 11 && r214 == 8 && Number(r215) !== 11\r\n\r\n",
+      "message" : "r212 = 3, r213 = 11, r214 = 8 tetapi r215 terisi selain 11",
+      "type" : 2
+    }, {
+      "test" : "let a = 20;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 8 && r214 == 8 && (Number(r215) !== 6 && Number(r215) !== 8)\r\n",
+      "message" : "r212 = 3, r213 = 8, r214 = 8 tetapi r215 terisi selain 6 atau 8",
+      "type" : 2
+    }, {
+      "test" : "let a = 40;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 22 && r214 == 7 && Number(r215) !== 21\r\n",
+      "message" : "r212 = 3, r213 = 22, r214 = 7 tetapi r215 terisi selain 21",
+      "type" : 2
+    }, {
+      "test" : "let a = 56;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 22 && r214 == 7 && Number(r215) == 22\r\n",
+      "message" : "r212 = 2, r213 = 22, r214 = 7 tetapi r215 terisi 22",
+      "type" : 1
+    }, {
+      "test" : "let a = 22;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 10 && r214 == 8 && (Number(r215) !== 6 || Number(r215) !== 10)\r\n",
+      "message" : "r212 = 3, r213 = 10, r214 = 8 tetapi r215 terisi selain 6 atau 10",
+      "type" : 2
+    }, {
+      "test" : "let a = 50;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 18 && (r214 == 1 || r214 == 2) && (Number(r215) == 12 || Number(r215) == 18)\r\n",
+      "message" : "r212 = 2, r213 = 18, r214 = 1 atau 2 tetapi r215 terisi 12 atau 18",
+      "type" : 1
+    }, {
+      "test" : "let a = 53;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 19 && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4 || r214 == 5) && (Number(r215) == 11 || Number(r215) == 19 || Number(r215) == 20 || Number(r215) == 21 || Number(r215) == 22)\r\n",
+      "message" : "r212 = 2, r213 = 19, r214 = 1 - 5 tetapi r215 terisi 11 atau 19 - 22",
+      "type" : 1
+    }, {
+      "test" : "let a = 24;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 15 || Number(r213) == 16) && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4) && (Number(r215) <6 || Number(r215) >10)\r\n",
+      "message" : "r212 = 3, r213 = 15 atau 16, r214 = 1 - 4 tetapi r215 terisi kurang dari 6 dan lebih dari 10",
+      "type" : 2
+    }, {
+      "test" : "let a = 27;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 13 && r214 == 8 && (Number(r215) !== 11 && Number(r215) !== 13)",
+      "message" : " r212 = 3, r213 = 13, r214 = 8 tetapi r215 terisi selain 11 atau 13",
+      "type" : 2
+    }, {
+      "test" : "let a = 26;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 12 && r214 == 8 && (Number(r215) !== 11 && Number(r215) !== 12)",
+      "message" : "r212 = 3, r213 = 12, r214 = 8 tetapi r215 terisi selain 11 atau 12",
+      "type" : 2
+    }, {
+      "test" : "let a = 5;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;r212 == 2 && (Number(r213) == 15 || Number(r213) == 16) && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4) && (Number(r215) < 6 || Number(r215) > 10)\r\n",
+      "message" : "r212 = 2, r213 = 15 atau 16, r214 = 1 - 4 tetapi r215 terisi kurang dari 6 atau diatas 10",
+      "type" : 2
+    }, {
+      "test" : "let a = 10;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 22 && r214 == 7 && (Number(r215) < 21 || Number(r215) > 22)\r\n",
+      "message" : "r212 = 2, r213 = 22, r214 = 7 tetapi r215 terisi kurang dari 21 atau lebih dari 22",
+      "type" : 2
+    }, {
+      "test" : "let a = 3;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;r212 == 2 && (Number(r213) == 6 || Number(r213) == 7 || Number(r213) == 8 || Number(r213) == 9 || Number(r213) == 10) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) > 5\r\n",
+      "message" : "r212 = 2, r213 = 6 - 10, r214 = 1 - 3 tetapi r215 terisi di atas 5",
+      "type" : 2
+    }, {
+      "test" : "let a = 23;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 11 || Number(r213) == 12 || Number(r213) == 13 || Number(r213) == 14) && (r214 == 1 || r214 == 2 || r214 == 3) && (Number(r215) <6 || Number(r215) >10)\r\n",
+      "message" : "r212 = 3, r213 = 11 - 14, r214 = 1 - 3 tetapi r215 terisi kurang dari 6 dan lebih dari 10",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 34;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 19 && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4 || r214 == 5) && (Number(r215) <11 || Number(r215) >19)\r\n",
+      "message" : "r212 = 3, r213 = 19, r214 = 1 - 5 tetapi r215 terisi kurang dari 11 dan di atas 19",
+      "type" : 2
+    }, {
+      "test" : "let a = 29;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 15 && r214 == 8 && (Number(r215) !== 11 && Number(r215) !== 15)",
+      "message" : " r212 = 3, r213 = 15, r214 = 8 tetapi r215 terisi selain 11 atau 15",
+      "type" : 2
+    }, {
+      "test" : "let a = 11;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 1 || Number(r213) == 2 || Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4 || r214 == 5 || r214 == 6) && Number(r215) < 23\r\n",
+      "message" : "r212 = 3, r213 = 1 - 5, r214 = 1 - 6 tetapi r215 terisi selain kode 23",
+      "type" : 2
+    }, {
+      "test" : "let a = 58;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 11 || Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 17) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) == 7\r\n",
+      "message" : "r212 = 3, r213 = 11 atau 13 atau 14 atau 17, r214 = 1 - 3 tetapi r215 terisi 7",
+      "type" : 1
+    }, {
+      "test" : "let a = 4;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;r212 == 2 && (Number(r213) == 11 || Number(r213) == 12 || Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 17) && (r214 == 1 || r214 == 2 || r214 == 3) && (Number(r215) < 6 || Number(r215) > 10)\r\n",
+      "message" : "r212 = 2, r213 = 11 - 17, r214 = 1 - 3 tetapi r215 terisi kurang dari 6 atau diatas 10",
+      "type" : 2
+    }, {
+      "test" : "let a = 32;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 18 && (r214 == 1 || r214 == 2 || r214 == 3) && (Number(r215) <11 || Number(r215) >18)\r\n",
+      "message" : "r212 = 3, r213 = 18, r214 = 1 - 3 tetapi r215 terisi kurang dari 11 dan di atas 18",
+      "type" : 2
+    }, {
+      "test" : "let a = 2;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && (Number(r213) == 1 || Number(r213) == 2 || Number(r213) == 3 || Number(r213) == 4 || Number(r213) == 5) && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4 || r214 == 5 || r214 == 6) && Number(r215) < 23\r\n",
+      "message" : "r212 = 2, r213 = 1 - 5, r214 = 1 - 6 tetapi r215 terisi selain kode 23",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 57;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 6 || Number(r213) == 8 || Number(r213) == 9 || Number(r213) == 10) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) == 2\r\n",
+      "message" : "r212 = 3, r213 = 6 atau 8 - 10, r214 = 1 - 3 tetapi r215 terisi 2",
+      "type" : 1
+    }, {
+      "test" : "let a = 28;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 14 && r214 == 8 && (Number(r215) !== 11 && Number(r215) !== 14)",
+      "message" : "r212 = 3, r213 = 14, r214 = 8 tetapi r215 terisi selain 11 atau 14",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 45;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 19 && (r214 == 1 || r214 == 2 || r214 == 3 || r214 == 4) && (Number(r215) < 11 || Number(r215) > 18)\r\n",
+      "message" : "r212 = 3, r213 = 18, r214 = 1 - 4 tetapi r215 terisi kurang dari 11 dan lebih dari 18",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 15;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 4 && r214 == 8 && (Number(r215) !== 1 && Number(r215) !== 4)\r\n",
+      "message" : "r212 = 3, r213 = 4, r214 = 8 tetapi r215 terisi selain 1 atau 4",
+      "type" : 2
+    }, {
+      "test" : "let a = 6;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;r212 == 2 && Number(r213) == 18 && (r214 == 1 || r214 == 2 || r214 == 3) && (Number(r215) < 11 || Number(r215) > 18)\r\n",
+      "message" : "r212 = 2, r213 = 18, r214 = 1 - 3 tetapi r215 terisi kurang dari 11 atau diatas 18",
+      "type" : 2
+    }, {
+      "test" : "let a = 12;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;r212 == 3 && Number(r213) == 1 && r214 == 8 && Number(r215) > 1\r\n",
+      "message" : "r212 = 3, r213 = 1, r214 = 8 tetapi r215 terisi lebih dari 1",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 37;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 20 && r214 == 8 && Number(r215) !== 20\r\n",
+      "message" : "r212 = 3, r213 = 20, r214 = 8 tetapi r215 terisi selain 20",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 51;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && Number(r213) == 18 && (r214 == 1 || r214 == 2 || r214 == 3) && (Number(r215) == 12 || Number(r215) == 18)\r\n",
+      "message" : "r212 = 2, r213 = 18, r214 = 1 - 3 tetapi r215 terisi 12 atau 18",
+      "type" : 1
+    }, {
+      "test" : "\r\nlet a = 13;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;r212 == 3 && Number(r213) == 2 && r214 == 8 && (Number(r215) !== 1 && Number(r215) !== 2)\r\n",
+      "message" : "r212 = 3, r213 = 2, r214 = 8 tetapi r215 terisi selain 1 atau 2",
+      "type" : 2
+    }, {
+      "test" : "let a = 38;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 21 && r214 == 6 && (Number(r215) <19 || Number(r215) >20)\r\n",
+      "message" : "r212 = 3, r213 = 21, r214 = 6 tetapi r215 terisi kurang dari 19 atau di atas 20",
+      "type" : 2
+    }, {
+      "test" : "let a = 42;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 11 || Number(r213) == 12 || Number(r213) == 13 || Number(r213) == 14 || Number(r213) == 15 || Number(r213) == 16 || Number(r213) == 17) && (r214 == 1 || r214 == 2 || r214 == 3) && (Number(r215) < 6 || Number(r215) >10)\r\n",
+      "message" : "r212 = 3, r213 = 11 - 7, r214 = 1 - 3 tetapi r215 terisi kurang dari 6 dan lebih dari 10",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 47;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 2 && (Number(r213) == 8 || Number(r213) == 9 || Number(r213) == 10) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) == 2\r\n",
+      "message" : "r212 = 2, r213 = 8 - 10, r214 = 1 - 3 tetapi r215 terisi 2",
+      "type" : 1
+    }, {
+      "test" : "\r\nlet a = 17;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && (Number(r213) == 6 || Number(r213) == 7 || Number(r213) == 8 || Number(r213) == 9 || Number(r213) == 10) && (r214 == 1 || r214 == 2 || r214 == 3) && Number(r215) > 5\r\n",
+      "message" : "r212 = 3, r213 = 6 - 10, r214 = 1 - 3 tetapi r215 terisi lebih dari 5",
+      "type" : 2
+    }, {
+      "test" : "\r\nlet a = 35;\r\nlet r209b = getValue('r209b@$ROW$');\r\nlet r212 = getValue('r212@$ROW$')?.[0].value;\r\nlet r213 = getValue('r213@$ROW$')?.[0].value;\r\nlet r214 = getValue('r214@$ROW$')?.[0].value;\r\nlet r215 = getValue('r215@$ROW$')?.[0].value;\r\nr212 == 3 && Number(r213) == 19 && r214 == 8 && Number(r215) !== 19\r\n",
+      "message" : "r212 = 3, r213 = 19, r214 = 8 tetapi r215 terisi selain 19",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r309",
+    "componentValidation" : [ "r309", "r308a" ],
+    "validations" : [ {
+      "test" : "let a = getValue('r309');\nlet b = getValue('r308a');\nif(a !== undefined && b != undefined ) \na?.[0]?.value == '01' && b?.[0]?.value == '4';",
+      "message" : "Rincian 309 terisi Listrik tapi rincian 308a terisi Bukan Listrik",
+      "type" : 1
+    } ]
+  }, {
+    "dataKey" : "r401b",
+    "componentValidation" : [ "r401b", "r308a" ],
+    "validations" : [ {
+      "test" : "let a = getValue('r401b');\nlet b = getValue('r308a');\nif(a !== undefined && b != undefined ) \nNumber(a) > 0 && b?.[0]?.value == '4';",
+      "message" : "Jika rincian 401b terisi > 0 maka rincian 308a harus terisi selain kode 4",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r401c",
+    "componentValidation" : [ "r401c", "r308a" ],
+    "validations" : [ {
+      "test" : "let a = getValue('r401c');\r\nlet b = getValue('r308a');\r\nif(a !== undefined && b != undefined ) \r\nNumber(a) > 0 && b?.[0]?.value == '4';\r\n\r\n",
+      "message" : "Jika rincian 401c terisi > 0 maka rincian 308a harus terisi selain kode 4",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r401d",
+    "componentValidation" : [ "r401d", "r308a" ],
+    "validations" : [ {
+      "test" : "let a = getValue('r401d');\r\nlet b = getValue('r308a');\r\nif(a !== undefined && b != undefined ) \r\nNumber(a) > 0 && b?.[0]?.value == '4';\r\n\r\n",
+      "message" : "Jika rincian 401d terisi > 0 maka rincian 308a harus terisi selain kode 4",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r401f",
+    "componentValidation" : [ "r401f", "r308a" ],
+    "validations" : [ {
+      "test" : "let a = getValue('r401f');\r\nlet b = getValue('r308a');\r\nif(a !== undefined && b != undefined ) \r\nNumber(a) > 0 && b?.[0]?.value == '4';\r\n\r\n",
+      "message" : "Jika rincian 401f terisi > 0 maka rincian 308a harus terisi selain kode 4",
+      "type" : 2
+    } ]
+  }, {
+    "dataKey" : "r401h",
+    "componentValidation" : [ "r401h", "r308a" ],
+    "validations" : [ {
+      "test" : "let a = getValue('r401h');\r\nlet b = getValue('r308a');\r\nif(a !== undefined && b != undefined ) \r\nNumber(a) > 0 && b?.[0]?.value == '4';\r\n\r\n",
+      "message" : "Jika rincian 401h terisi > 0 maka rincian 308a harus terisi selain kode 4",
+      "type" : 2
+    } ]
+  } ]
+}
