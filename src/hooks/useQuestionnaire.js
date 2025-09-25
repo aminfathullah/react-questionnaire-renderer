@@ -7,7 +7,13 @@ export function useQuestionnaire() {
   if (!context) {
     throw new Error('useQuestionnaire must be used within a QuestionnaireProvider');
   }
-  return context;
+  const { runtime, ...rest } = context;
+  return {
+    ...rest,
+    submit: runtime?.submit || null,
+    reset: runtime?.reset || null,
+    getResponses: runtime?.getResponses || null
+  };
 }
 
 // Utility function to get value from responses or variables

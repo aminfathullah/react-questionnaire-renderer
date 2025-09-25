@@ -2,6 +2,7 @@
   "name": "rsurvey",
   "private": true,
   "version": "0.0.0",
+  "types": "./src/types.d.ts",
   "type": "module",
   "scripts": {
     "dev": "vite",

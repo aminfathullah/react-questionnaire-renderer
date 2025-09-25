@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Typography, Box, Alert } from '@mui/material';
-import { QuestionnaireProvider } from './contexts/QuestionnaireContext';
-import QuestionnaireRenderer from './components/QuestionnaireLayout';
+import QuestionnaireRenderer from './components/QuestionnaireRenderer';
 
 // Create Material-UI theme
 const theme = createTheme({
@@ -37,6 +36,7 @@ function App() {
   const [validation, setValidation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [submitStatus, setSubmitStatus] = useState(null);
 
   useEffect(() => {
     // Load questionnaire and validation data
@@ -72,6 +72,21 @@ function App() {
     loadData();
   }, []);
 
+  // Move hooks here so they are always called (not after early returns)
+  const handleSubmit = useCallback(async (responses) => {
+    console.log('Submitting responses', responses);
+    setSubmitStatus({ type: 'success', message: 'Responses submitted successfully.' });
+  }, []);
+
+  const handleValidationError = useCallback((errorsMap) => {
+    const count = Object.keys(errorsMap || {}).length;
+    setSubmitStatus({ type: 'error', message: `Please resolve ${count} validation error${count === 1 ? '' : 's'} before submitting.` });
+  }, []);
+
+  const handleChange = useCallback((responses) => {
+    console.log('Responses changed', responses);
+  }, []);
+
   if (loading) {
     return (
       <ThemeProvider theme={theme}>
@@ -102,25 +117,34 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <QuestionnaireProvider>
-        <Container maxWidth="lg" sx={{ py: 2 }}>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h4" component="h1" align="center" gutterBottom>
-              {questionnaire?.title || 'Research Survey'}
+      <Container maxWidth="lg" sx={{ py: 2 }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h4" component="h1" align="center" gutterBottom>
+            {questionnaire?.title || 'Research Survey'}
+          </Typography>
+          {questionnaire?.description && (
+            <Typography variant="body1" align="center" color="text.secondary">
+              {questionnaire.description}
             </Typography>
-            {questionnaire?.description && (
-              <Typography variant="body1" align="center" color="text.secondary">
-                {questionnaire.description}
-              </Typography>
-            )}
-          </Box>
-          
-          <QuestionnaireRenderer 
-            questionnaire={questionnaire} 
-            validation={validation}
-          />
-        </Container>
-      </QuestionnaireProvider>
+          )}
+        </Box>
+
+        {submitStatus && (
+          <Alert sx={{ mb: 2 }} severity={submitStatus.type === 'error' ? 'error' : 'success'}>
+            {submitStatus.message}
+          </Alert>
+        )}
+        
+        <QuestionnaireRenderer
+          templateJson={questionnaire}
+          validationJson={validation}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          onValidationError={handleValidationError}
+          enableAutosave={{ debounceMs: 500, clearOnSubmit: true }}
+          storageKey="rsurvey-demo-draft"
+        />
+      </Container>
     </ThemeProvider>
   );
 }

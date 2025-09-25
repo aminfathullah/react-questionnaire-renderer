@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useEffect, useCallback, useState } from 'react';
+import React, { createContext, useReducer, useEffect, useCallback } from 'react';
 
 const QuestionnaireContext = createContext();
 
@@ -12,27 +12,71 @@ const ActionTypes = {
   CLEAR_ERROR: 'CLEAR_ERROR',
   SET_LOADING: 'SET_LOADING',
   SET_OFFLINE: 'SET_OFFLINE',
-  LOAD_FROM_STORAGE: 'LOAD_FROM_STORAGE',
   LOAD_QUESTIONNAIRE: 'LOAD_QUESTIONNAIRE',
-  SET_TOUCHED: 'SET_TOUCHED'
+  SET_TOUCHED: 'SET_TOUCHED',
+  SET_INITIAL_RESPONSES: 'SET_INITIAL_RESPONSES',
+  RESET_RESPONSES: 'RESET_RESPONSES',
+  SET_ERRORS: 'SET_ERRORS',
+  SET_RUNTIME_METHODS: 'SET_RUNTIME_METHODS',
+  SET_CONFIG: 'SET_CONFIG'
+};
+
+const safeNavigator = typeof navigator !== 'undefined' ? navigator : undefined;
+
+const deepClone = (value) => {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(value);
+  }
+  try {
+    return JSON.parse(JSON.stringify(value));
+  } catch {
+    return value;
+  }
+};
+
+const isDeepEqual = (a, b) => {
+  if (a === b) return true;
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
 };
 
 const initialState = {
   questionnaire: null,
+  template: null,
   validation: null,
   currentPage: 0,
   responses: {},
+  initialResponses: {},
   variables: {},
   errors: {},
   touched: {},
   isLoading: false,
-  isOnline: navigator.onLine
+  isOnline: safeNavigator ? safeNavigator.onLine : true,
+  isDirty: false,
+  validationState: 'unknown',
+  runtime: null,
+  config: {
+    readOnly: false,
+    disabled: false,
+    locale: 'en',
+    translations: {},
+    fetchMedia: null,
+    theme: null,
+    componentsMap: {}
+  }
 };
 
 function questionnaireReducer(state, action) {
   switch (action.type) {
     case ActionTypes.SET_QUESTIONNAIRE:
-      return { ...state, questionnaire: action.payload };
+      return {
+        ...state,
+        questionnaire: action.payload,
+        template: action.payload
+      };
     
     case ActionTypes.SET_VALIDATION:
       return { ...state, validation: action.payload };
@@ -41,27 +85,26 @@ function questionnaireReducer(state, action) {
       return { ...state, currentPage: action.payload };
     
     case ActionTypes.SET_RESPONSE: {
-      // Build the new responses object but avoid updating state if nothing changed
       const newResponses = { ...state.responses };
       if (action.payload.value === null || action.payload.value === undefined) {
-        // If deleting but key doesn't exist, no change
         if (!(action.payload.dataKey in newResponses)) return state;
         delete newResponses[action.payload.dataKey];
       } else {
         const existing = state.responses[action.payload.dataKey];
-        // Shallow/structural equality check - works for primitives and simple objects/arrays
         const unchanged = existing === action.payload.value || JSON.stringify(existing) === JSON.stringify(action.payload.value);
         if (unchanged) return state;
         newResponses[action.payload.dataKey] = action.payload.value;
       }
-      return { ...state, responses: newResponses };
+      return {
+        ...state,
+        responses: newResponses,
+        isDirty: !isDeepEqual(newResponses, state.initialResponses)
+      };
     }
     
     case ActionTypes.SET_VARIABLE: {
-      // Build the new variables object but avoid updating state if nothing changed
       const newVariables = { ...state.variables };
       if (action.payload.value === null || action.payload.value === undefined) {
-        // If deleting but key doesn't exist, no change
         if (!(action.payload.dataKey in newVariables)) return state;
         delete newVariables[action.payload.dataKey];
       } else {
@@ -76,13 +119,18 @@ function questionnaireReducer(state, action) {
     case ActionTypes.SET_ERROR:
       return {
         ...state,
-        errors: { ...state.errors, [action.payload.dataKey]: action.payload.error }
+        errors: { ...state.errors, [action.payload.dataKey]: action.payload.error },
+        validationState: 'invalid'
       };
 
     case ActionTypes.CLEAR_ERROR: {
       const newErrors = { ...state.errors };
       delete newErrors[action.payload.dataKey];
-      return { ...state, errors: newErrors };
+      return {
+        ...state,
+        errors: newErrors,
+        validationState: Object.keys(newErrors).length ? 'invalid' : 'valid'
+      };
     }
 
     case ActionTypes.SET_TOUCHED:
@@ -97,19 +145,51 @@ function questionnaireReducer(state, action) {
     case ActionTypes.SET_OFFLINE:
       return { ...state, isOnline: !action.payload };
     
-    case ActionTypes.LOAD_FROM_STORAGE:
+    case ActionTypes.LOAD_QUESTIONNAIRE:
       return {
         ...state,
-        ...action.payload,
-        touched: action.payload.touched || {}
-      };
-    
-    case ActionTypes.LOAD_QUESTIONNAIRE:
-      // Preserve existing responses and variables when loading questionnaire
-      return { 
-        ...state, 
         questionnaire: action.payload.questionnaire,
+        template: action.payload.questionnaire,
         validation: action.payload.validation
+      };
+
+    case ActionTypes.SET_INITIAL_RESPONSES: {
+      const initial = deepClone(action.payload || {});
+      return {
+        ...state,
+        initialResponses: initial,
+        responses: deepClone(action.payload || {}),
+        isDirty: false
+      };
+    }
+
+    case ActionTypes.RESET_RESPONSES:
+      return {
+        ...state,
+        responses: deepClone(state.initialResponses || {}),
+        isDirty: false
+      };
+
+    case ActionTypes.SET_ERRORS:
+      return {
+        ...state,
+        errors: action.payload || {},
+        validationState: action.payload && Object.keys(action.payload).length ? 'invalid' : 'valid'
+      };
+
+    case ActionTypes.SET_RUNTIME_METHODS:
+      return {
+        ...state,
+        runtime: action.payload
+      };
+
+    case ActionTypes.SET_CONFIG:
+      return {
+        ...state,
+        config: {
+          ...state.config,
+          ...(action.payload || {})
+        }
       };
     
     default:
@@ -119,42 +199,13 @@ function questionnaireReducer(state, action) {
 
 export function QuestionnaireProvider({ children }) {
   const [state, dispatch] = useReducer(questionnaireReducer, initialState);
-  const [hasLoadedFromStorage, setHasLoadedFromStorage] = useState(false);
-
-  // Load data from localStorage on mount
-  useEffect(() => {
-    try {
-      const savedState = localStorage.getItem('questionnaire-state');
-      if (savedState) {
-        const parsedState = JSON.parse(savedState);
-        dispatch({ type: ActionTypes.LOAD_FROM_STORAGE, payload: parsedState });
-      }
-    } catch (error) {
-      console.error('Error loading from localStorage:', error);
-    } finally {
-      setHasLoadedFromStorage(true);
-    }
-  }, []);
-
-  // Save to localStorage when state changes (but only after initial load)
-  useEffect(() => {
-    if (hasLoadedFromStorage) {
-      try {
-        const stateToSave = {
-          currentPage: state.currentPage,
-          responses: state.responses,
-          variables: state.variables,
-          touched: state.touched
-        };
-        localStorage.setItem('questionnaire-state', JSON.stringify(stateToSave));
-      } catch (error) {
-        console.error('Error saving to localStorage:', error);
-      }
-    }
-  }, [state.currentPage, state.responses, state.variables, hasLoadedFromStorage]);
 
   // Monitor online/offline status
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
     const handleOnline = () => dispatch({ type: ActionTypes.SET_OFFLINE, payload: false });
     const handleOffline = () => dispatch({ type: ActionTypes.SET_OFFLINE, payload: true });
 
@@ -219,6 +270,26 @@ export function QuestionnaireProvider({ children }) {
     });
   }, []);
 
+  const setInitialResponses = useCallback((responses) => {
+    dispatch({ type: ActionTypes.SET_INITIAL_RESPONSES, payload: responses });
+  }, []);
+
+  const resetResponses = useCallback(() => {
+    dispatch({ type: ActionTypes.RESET_RESPONSES });
+  }, []);
+
+  const setErrors = useCallback((errors) => {
+    dispatch({ type: ActionTypes.SET_ERRORS, payload: errors });
+  }, []);
+
+  const setRuntimeMethods = useCallback((runtime) => {
+    dispatch({ type: ActionTypes.SET_RUNTIME_METHODS, payload: runtime });
+  }, []);
+
+  const setConfig = useCallback((config) => {
+    dispatch({ type: ActionTypes.SET_CONFIG, payload: config });
+  }, []);
+
   const value = {
     ...state,
     setQuestionnaire,
@@ -230,7 +301,12 @@ export function QuestionnaireProvider({ children }) {
     clearError,
     setTouched,
     setLoading,
-    loadQuestionnaire
+    loadQuestionnaire,
+    setInitialResponses,
+    resetResponses,
+    setErrors,
+    setRuntimeMethods,
+    setConfig
   };
 
   return (

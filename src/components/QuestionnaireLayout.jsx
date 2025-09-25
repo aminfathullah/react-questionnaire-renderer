@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Box,
   Drawer,
@@ -29,7 +29,31 @@ import QuestionRenderer from './QuestionRenderer';
 
 const DRAWER_WIDTH = 280;
 
-function QuestionnaireLayout({ questionnaire, validation: validationRules }) {
+const extractSections = (template) => {
+  if (!template?.components) {
+    return [];
+  }
+
+  const sections = [];
+  template.components.forEach((pageComponents) => {
+    if (!Array.isArray(pageComponents)) return;
+    pageComponents.forEach((component) => {
+      if (component?.type === 1) {
+        sections.push(component);
+      }
+    });
+  });
+
+  return sections;
+};
+
+function QuestionnaireLayout({
+  template: templateOverride,
+  className,
+  style,
+  header,
+  footer
+}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
@@ -38,39 +62,15 @@ function QuestionnaireLayout({ questionnaire, validation: validationRules }) {
     responses,
     variables,
     errors,
+    validation,
     setCurrentPage,
-    loadQuestionnaire
+    template
   } = useQuestionnaire();
 
-  const [sections, setSections] = useState([]);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Load questionnaire data
-  useEffect(() => {
-    if (questionnaire && validationRules) {
-      loadQuestionnaire(questionnaire, validationRules);
-    }
-  }, [questionnaire, validationRules, loadQuestionnaire]);
-
-  // Extract sections from questionnaire
-  useEffect(() => {
-    if (questionnaire?.components) {
-      const sectionList = [];
-      
-      questionnaire.components.forEach((pageComponents) => {
-        if (Array.isArray(pageComponents)) {
-          pageComponents.forEach((component) => {
-            if (component.type === 1) { // Section type
-              sectionList.push(component);
-            }
-          });
-        }
-      });
-      
-      console.log('Extracted sections:', sectionList);
-      setSections(sectionList);
-    }
-  }, [questionnaire]);
+  const effectiveTemplate = templateOverride || template;
+  const sections = useMemo(() => extractSections(effectiveTemplate), [effectiveTemplate]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -103,7 +103,7 @@ function QuestionnaireLayout({ questionnaire, validation: validationRules }) {
           responses={responses}
           variables={variables}
           errors={errors}
-          validation={validationRules}
+          validation={validation}
         />
       </Box>
     ));
@@ -188,7 +188,7 @@ function QuestionnaireLayout({ questionnaire, validation: validationRules }) {
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex' }} className={className} style={style}>
       <AppBar
         position="fixed"
         sx={{
@@ -206,7 +206,7 @@ function QuestionnaireLayout({ questionnaire, validation: validationRules }) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            PDTSEN 2025 KOTA SURABAYA
+            {effectiveTemplate?.title || 'Questionnaire'}
           </Typography>
           <Chip 
             icon={<SubmitIcon />}
@@ -250,6 +250,7 @@ function QuestionnaireLayout({ questionnaire, validation: validationRules }) {
         <Toolbar />
         
         <Container maxWidth="lg" sx={{ py: 3, pb: 12 }}>
+          {header}
           {currentSection ? (
             <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
               {/* Render section questions */}
@@ -262,6 +263,8 @@ function QuestionnaireLayout({ questionnaire, validation: validationRules }) {
               </Typography>
             </Paper>
           )}
+
+          {footer}
 
           {/* Sticky Navigation buttons */}
           <Paper

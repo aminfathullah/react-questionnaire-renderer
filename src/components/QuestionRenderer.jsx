@@ -72,7 +72,20 @@ function QuestionRenderer({
   validation = [],
   rowIndex = null 
 }) {
-  const { setResponse, setVariable, clearError } = useQuestionnaire();
+  const {
+    setResponse,
+    setVariable,
+    clearError,
+    config
+  } = useQuestionnaire();
+
+  const isReadOnly = Boolean(config?.readOnly);
+  const isDisabled = Boolean(config?.disabled);
+  const isComponentDisabled = isReadOnly || isDisabled;
+  const locale = config?.locale ?? 'en';
+  const translations = config?.translations ?? {};
+  const fetchMedia = config?.fetchMedia;
+  const componentOverrides = config?.componentsMap || {};
 
   // For variable components with expression, compute and store the value
   useEffect(() => {
@@ -113,6 +126,9 @@ function QuestionRenderer({
 
   // Handle value changes
   const handleChange = (value) => {
+    if (isComponentDisabled) {
+      return;
+    }
     // Clear any existing error
     if (currentError) {
       clearError(dataKey);
@@ -141,8 +157,30 @@ function QuestionRenderer({
     responses,
     variables,
     rowIndex,
-    validation
+    validation,
+    readOnly: isReadOnly,
+    disabled: isComponentDisabled,
+    locale,
+    translations,
+    fetchMedia
   };
+
+  const overrideComponent =
+    componentOverrides[question.dataKey] ||
+    componentOverrides[question.type] ||
+    componentOverrides[String(question.type)] ||
+    (question.questionType ? componentOverrides[question.questionType] : undefined) ||
+    (QUESTION_TYPE_MAP[question.type] ? componentOverrides[QUESTION_TYPE_MAP[question.type]] : undefined);
+
+  if (overrideComponent) {
+    if (React.isValidElement(overrideComponent)) {
+      return React.cloneElement(overrideComponent, commonProps);
+    }
+    if (typeof overrideComponent === 'function') {
+      const OverrideComponent = overrideComponent;
+      return <OverrideComponent {...commonProps} />;
+    }
+  }
 
   // Render appropriate component based on question type
   const renderQuestionComponent = () => {

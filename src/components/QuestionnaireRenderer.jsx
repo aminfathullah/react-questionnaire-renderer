@@ -1,249 +1,424 @@
-import React, { useState, useEffect } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useImperativeHandle
+} from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import { QuestionnaireProvider } from '../contexts/QuestionnaireContext';
+import { useQuestionnaire } from '../hooks/useQuestionnaire';
+import QuestionnaireLayout from './QuestionnaireLayout';
+import SimpleQuestionnaireRenderer from './SimpleQuestionnaireRenderer';
 import {
-  Box,
-  Container,
-  Paper,
-  Typography,
-  LinearProgress,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Chip,
-  Alert,
-} from '@mui/material';
-import {
-  ArrowBack as ArrowBackIcon,
-  ArrowForward as ArrowForwardIcon,
-  WifiOff as WifiOffIcon,
-  Save as SaveIcon,
-} from '@mui/icons-material';
-import { useQuestionnaire, processPlaceholders } from '../hooks/useQuestionnaire';
-import QuestionRenderer from './QuestionRenderer';
+  normalizeResponses,
+  serializeResponses,
+  deserializeResponses
+} from '../utils/responses';
+import { validateResponse as runValidation } from '../utils/validation';
 
-function QuestionnaireRenderer({ questionnaire, validation }) {
+const resolveLayoutComponent = (layout) => {
+  if (!layout || layout === 'default') {
+    return QuestionnaireLayout;
+  }
+  if (layout === 'simple') {
+    return SimpleQuestionnaireRenderer;
+  }
+  return layout;
+};
+
+const createDefaultStore = () => {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return null;
+  }
+
+  return {
+    async get(key) {
+      return window.localStorage.getItem(key);
+    },
+    async set(key, value) {
+      window.localStorage.setItem(key, value);
+    },
+    async remove(key) {
+      window.localStorage.removeItem(key);
+    }
+  };
+};
+
+const QuestionnaireRendererInner = forwardRef((props, ref) => {
   const {
-    currentPage,
+    templateJson,
+    validationJson,
+    initialData,
+    onChange,
+    onSubmit,
+    onValidationError,
+    componentsMap,
+    layout = 'default',
+    readOnly = false,
+    disabled = false,
+    locale = 'en',
+    translations = {},
+    theme = null,
+    persistentStore = null,
+    storageKey = 'questionnaire-draft',
+    autosaveConfig = null,
+    validators = {},
+    asyncValidation = false,
+    fetchMedia = null,
+    onError = null,
+    className,
+    style,
+    children,
+    ...layoutProps
+  } = props;
+
+  const {
     responses,
     variables,
-    errors,
-    isOnline,
-    setCurrentPage,
+    touched,
+    validation,
+    setConfig,
+    setInitialResponses,
     loadQuestionnaire,
+    setErrors,
+    resetResponses,
+    setRuntimeMethods,
     setTouched
   } = useQuestionnaire();
 
-  const [currentSection, setCurrentSection] = useState(null);
-  const [sections, setSections] = useState([]);
+  const [hydrationState, setHydrationState] = useState({ initial: false, draft: false });
+  const initialDataHashRef = useRef(null);
+  const autosaveEnabled = Boolean(autosaveConfig);
+  const debounceMs = autosaveConfig?.debounceMs ?? 300;
 
-  // Load questionnaire data when component mounts
-  useEffect(() => {
-    if (questionnaire && validation) {
-      loadQuestionnaire(questionnaire, validation);
+  const store = useMemo(() => {
+    if (persistentStore) {
+      return persistentStore;
     }
-  }, [questionnaire, validation, loadQuestionnaire]);
+    if (autosaveEnabled) {
+      return createDefaultStore();
+    }
+    return null;
+  }, [persistentStore, autosaveEnabled]);
 
-  // Extract sections from questionnaire
+  const handleError = useCallback((error) => {
+    if (!error) return;
+    console.error('[QuestionnaireRenderer] error:', error);
+    if (typeof onError === 'function') {
+      onError(error);
+    }
+  }, [onError]);
+
+  // Load template + validation when provided
   useEffect(() => {
-    if (questionnaire?.components) {
-      const sectionList = [];
-      questionnaire.components.forEach((component) => {
-        if (Array.isArray(component)) {
-          component.forEach((item) => {
-            if (item.type === 1) { // Section type
-              sectionList.push(item);
-            }
-          });
-        }
+    if (!templateJson) {
+      handleError(new Error('templateJson is required for QuestionnaireRenderer'));
+      return;
+    }
+    try {
+      loadQuestionnaire(templateJson, validationJson ?? validation ?? null);
+    } catch (error) {
+      handleError(error);
+    }
+  }, [templateJson, validationJson, validation, loadQuestionnaire, handleError]);
+
+  // Apply global config for consumers/layout/questions
+  useEffect(() => {
+    try {
+      setConfig({
+        readOnly,
+        disabled,
+        locale,
+        translations,
+        fetchMedia,
+        theme,
+        componentsMap: componentsMap || {}
       });
-      setSections(sectionList);
-      if (sectionList.length > 0 && !currentSection) {
-        setCurrentSection(sectionList[0]);
-      }
+    } catch (error) {
+      handleError(error);
     }
-  }, [questionnaire, currentSection]);
+  }, [readOnly, disabled, locale, translations, fetchMedia, theme, componentsMap, setConfig, handleError]);
 
-  // Update current section based on page
+  // Hydrate initial responses when they change meaningfully
   useEffect(() => {
-    if (sections.length > 0 && currentPage < sections.length) {
-      setCurrentSection(sections[currentPage]);
-    }
-  }, [currentPage, sections]);
-
-  const handlePrevPage = () => {
-    if (currentPage > 0) {
-      // Touch all questions in current section before navigating
-      if (currentSection?.components?.[0]) {
-        currentSection.components[0].forEach(component => {
-          if (component.dataKey) {
-            setTouched(component.dataKey);
-          }
-        });
+    const normalizedInitial = normalizeResponses(initialData || {});
+    const hash = JSON.stringify(normalizedInitial);
+    if (initialDataHashRef.current !== hash) {
+      initialDataHashRef.current = hash;
+      try {
+        setInitialResponses(normalizedInitial);
+      } catch (error) {
+        handleError(error);
       }
-      setCurrentPage(currentPage - 1);
     }
-  };
+    setHydrationState((prev) => ({ ...prev, initial: true }));
+  }, [initialData, setInitialResponses, handleError]);
 
-  const handleNextPage = () => {
-    if (currentPage < sections.length - 1) {
-      // Touch all questions in current section before navigating
-      if (currentSection?.components?.[0]) {
-        currentSection.components[0].forEach(component => {
-          if (component.dataKey) {
-            setTouched(component.dataKey);
-          }
-        });
+  // Hydrate from persistent storage (autosave) if enabled
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!autosaveEnabled || !store) {
+      setHydrationState((prev) => ({ ...prev, draft: true }));
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const hydrateDraft = async () => {
+      try {
+        const saved = await Promise.resolve(store.get?.(storageKey));
+        if (!cancelled && saved) {
+          const parsed = deserializeResponses(saved);
+          const merged = {
+            ...normalizeResponses(initialData || {}),
+            ...normalizeResponses(parsed)
+          };
+          setInitialResponses(merged);
+          initialDataHashRef.current = JSON.stringify(merged);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          handleError(error);
+        }
+      } finally {
+        if (!cancelled) {
+          setHydrationState((prev) => ({ ...prev, draft: true }));
+        }
       }
-      setCurrentPage(currentPage + 1);
+    };
+
+    hydrateDraft();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [autosaveEnabled, store, storageKey, initialData, setInitialResponses, handleError]);
+
+  const isReady = hydrationState.initial && hydrationState.draft;
+  const normalizedResponses = useMemo(() => normalizeResponses(responses), [responses]);
+
+  // Trigger onChange with debounce once hydrated
+  useEffect(() => {
+    if (!isReady || typeof onChange !== 'function') {
+      return undefined;
     }
-  };
+    const handle = setTimeout(() => {
+      try {
+        onChange(normalizedResponses);
+      } catch (error) {
+        handleError(error);
+      }
+    }, debounceMs);
 
-  const calculateProgress = () => {
-    if (sections.length === 0) return 0;
-    return Math.round(((currentPage + 1) / sections.length) * 100);
-  };
+    return () => clearTimeout(handle);
+  }, [normalizedResponses, onChange, debounceMs, handleError, isReady]);
 
-  const renderSectionContent = (section) => {
-    if (!section?.components) return null;
+  // Autosave draft responses when enabled
+  useEffect(() => {
+    if (!isReady || !autosaveEnabled || !store) {
+      return undefined;
+    }
 
-    return section.components[0]?.map((component, index) => (
-      <Box key={component.dataKey || index} sx={{ mb: 3 }}>
-        <QuestionRenderer 
-          question={component}
-          responses={responses}
-          variables={variables}
-          errors={errors}
-          validation={validation}
-        />
-      </Box>
-    ));
-  };
+    const handle = setTimeout(() => {
+      const snapshot = normalizedResponses;
+      const hasContent = Object.keys(snapshot).length > 0;
 
-  if (!questionnaire) {
-    return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Typography variant="h6" align="center">
-          No questionnaire data available
-        </Typography>
-      </Container>
+      const operation = hasContent
+        ? store.set?.(storageKey, serializeResponses(snapshot))
+        : store.remove?.(storageKey);
+
+      Promise.resolve(operation).catch(handleError);
+    }, debounceMs);
+
+    return () => clearTimeout(handle);
+  }, [normalizedResponses, autosaveEnabled, store, storageKey, debounceMs, handleError, isReady]);
+
+  const runValidate = useCallback(async () => {
+    return runValidation(templateJson, validationJson ?? validation ?? null, normalizedResponses, {
+      variables,
+      touched,
+      validators,
+      asyncValidation,
+      locale,
+      translations
+    });
+  }, [templateJson, validationJson, validation, normalizedResponses, variables, touched, validators, asyncValidation, locale, translations]);
+
+  const getCurrentResponses = useCallback(() => normalizeResponses(responses), [responses]);
+
+  const clearDraft = useCallback(() => {
+    if (!autosaveEnabled || !store) {
+      return Promise.resolve();
+    }
+    return Promise.resolve(store.remove?.(storageKey)).catch(handleError);
+  }, [autosaveEnabled, store, storageKey, handleError]);
+
+  const handleSubmit = useCallback(async () => {
+    try {
+      const result = await runValidate();
+      setErrors(result.errors);
+
+      if (!result.valid) {
+        Object.keys(result.errors).forEach((key) => setTouched(key));
+        if (typeof onValidationError === 'function') {
+          onValidationError(result.errors);
+        }
+        return { ok: false, errors: result.errors };
+      }
+
+      if (typeof onSubmit === 'function') {
+        await Promise.resolve(onSubmit(normalizedResponses));
+      }
+
+      if (autosaveConfig?.clearOnSubmit) {
+        await clearDraft();
+      }
+
+      return { ok: true, responses: normalizedResponses };
+    } catch (error) {
+      handleError(error);
+      throw error;
+    }
+  }, [runValidate, setErrors, setTouched, onValidationError, onSubmit, normalizedResponses, autosaveConfig, clearDraft, handleError]);
+
+  const handleReset = useCallback(async () => {
+    try {
+      resetResponses();
+      setErrors({});
+      await clearDraft();
+    } catch (error) {
+      handleError(error);
+    }
+  }, [resetResponses, setErrors, clearDraft, handleError]);
+
+  useImperativeHandle(ref, () => ({
+    submit: handleSubmit,
+    reset: handleReset,
+    getResponses: getCurrentResponses
+  }), [handleSubmit, handleReset, getCurrentResponses]);
+
+  useEffect(() => {
+    setRuntimeMethods({
+      submit: handleSubmit,
+      reset: handleReset,
+      getResponses: getCurrentResponses
+    });
+    return () => {
+      setRuntimeMethods(null);
+    };
+  }, [setRuntimeMethods, handleSubmit, handleReset, getCurrentResponses]);
+
+  const LayoutComponent = useMemo(() => resolveLayoutComponent(layout), [layout]);
+
+  let content = null;
+  if (React.isValidElement(LayoutComponent)) {
+    content = React.cloneElement(LayoutComponent, { className, style, ...layoutProps }, children);
+  } else if (typeof LayoutComponent === 'function') {
+    content = (
+      <LayoutComponent className={className} style={style} {...layoutProps}>
+        {children}
+      </LayoutComponent>
+    );
+  } else {
+    content = (
+      <QuestionnaireLayout className={className} style={style} {...layoutProps}>
+        {children}
+      </QuestionnaireLayout>
     );
   }
 
+  if (theme) {
+    if (React.isValidElement(theme)) {
+      return React.cloneElement(theme, undefined, content);
+    }
+    if (typeof theme === 'function') {
+      const ThemedWrapper = theme;
+      return <ThemedWrapper>{content}</ThemedWrapper>;
+    }
+    return <ThemeProvider theme={theme}>{content}</ThemeProvider>;
+  }
+
+  return content;
+});
+
+QuestionnaireRendererInner.displayName = 'QuestionnaireRendererInner';
+
+const QuestionnaireRenderer = forwardRef((props, ref) => {
+  const {
+    templateJson,
+    validationJson,
+    initialData,
+    onChange,
+    onSubmit,
+    onValidationError,
+    componentsMap,
+    layout,
+    readOnly,
+    disabled,
+    locale,
+    translations,
+    theme,
+    persistentStore,
+    storageKey,
+    enableAutosave,
+    validators,
+    asyncValidation,
+    fetchMedia,
+    onError,
+    className,
+    style,
+    children,
+    ...layoutProps
+  } = props;
+
+  const autosaveConfig = useMemo(() => {
+    if (!enableAutosave) {
+      return null;
+    }
+    if (typeof enableAutosave === 'object') {
+      return enableAutosave;
+    }
+    return {};
+  }, [enableAutosave]);
+
   return (
-    <Box sx={{ pb: 8 }}>
-      {/* Header with progress */}
-      <AppBar position="static" color="primary" elevation={1}>
-        <Toolbar>
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h6" component="div">
-              {questionnaire.title || 'Survey'}
-            </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.8 }}>
-              Section {currentPage + 1} of {sections.length}
-            </Typography>
-          </Box>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {/* Online/Offline indicator */}
-            <Chip
-              icon={isOnline ? <SaveIcon /> : <WifiOffIcon />}
-              label={isOnline ? 'Online' : 'Offline'}
-              color={isOnline ? 'success' : 'warning'}
-              size="small"
-            />
-          </Box>
-        </Toolbar>
-        
-        {/* Progress bar */}
-        <LinearProgress 
-          variant="determinate" 
-          value={calculateProgress()} 
-          sx={{ height: 6 }}
-        />
-      </AppBar>
-
-      {/* Main content */}
-      <Container maxWidth="md" sx={{ py: 3 }}>
-        {currentSection && (
-          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h5" component="h2" gutterBottom>
-              {processPlaceholders(currentSection.label, responses, variables)}
-            </Typography>
-            
-            {currentSection.description && (
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                {processPlaceholders(currentSection.description, responses, variables)}
-              </Typography>
-            )}
-
-            {renderSectionContent(currentSection)}
-          </Paper>
-        )}
-
-        {/* Error display */}
-        {Object.keys(errors).length > 0 && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            <Typography variant="body2">
-              Please correct the errors above before continuing.
-            </Typography>
-          </Alert>
-        )}
-      </Container>
-
-      {/* Mobile navigation bar - fixed at bottom */}
-      <Paper 
-        elevation={3}
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          p: 2,
-          zIndex: 1000,
-          borderRadius: 0,
-        }}
+    <QuestionnaireProvider>
+      <QuestionnaireRendererInner
+        ref={ref}
+        templateJson={templateJson}
+        validationJson={validationJson}
+        initialData={initialData}
+        onChange={onChange}
+        onSubmit={onSubmit}
+        onValidationError={onValidationError}
+        componentsMap={componentsMap}
+        layout={layout}
+        readOnly={readOnly}
+        disabled={disabled}
+        locale={locale}
+        translations={translations}
+        theme={theme}
+        persistentStore={persistentStore}
+        storageKey={storageKey}
+        autosaveConfig={autosaveConfig}
+        validators={validators}
+        asyncValidation={asyncValidation}
+        fetchMedia={fetchMedia}
+        onError={onError}
+        className={className}
+        style={style}
+        {...layoutProps}
       >
-        <Box 
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            maxWidth: 'md',
-            mx: 'auto',
-          }}
-        >
-          <IconButton
-            onClick={handlePrevPage}
-            disabled={currentPage === 0}
-            sx={{
-              bgcolor: 'primary.main',
-              color: 'white',
-              '&:hover': { bgcolor: 'primary.dark' },
-              '&:disabled': { bgcolor: 'grey.300' },
-            }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
-
-          <Typography variant="body2" sx={{ mx: 2 }}>
-            {currentSection?.label && processPlaceholders(currentSection.label, responses, variables)}
-          </Typography>
-
-          <IconButton
-            onClick={handleNextPage}
-            disabled={currentPage >= sections.length - 1}
-            sx={{
-              bgcolor: 'primary.main',
-              color: 'white',
-              '&:hover': { bgcolor: 'primary.dark' },
-              '&:disabled': { bgcolor: 'grey.300' },
-            }}
-          >
-            <ArrowForwardIcon />
-          </IconButton>
-        </Box>
-      </Paper>
-    </Box>
+        {children}
+      </QuestionnaireRendererInner>
+    </QuestionnaireProvider>
   );
-}
+});
+
+QuestionnaireRenderer.displayName = 'QuestionnaireRenderer';
 
 export default QuestionnaireRenderer;
