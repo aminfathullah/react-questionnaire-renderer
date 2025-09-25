@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Typography, Box, Alert } from '@mui/material';
-import QuestionnaireRenderer from './components/QuestionnaireRenderer';
+import QuestionnaireRenderer from 'react-questionnaire-renderer';
 
 // Create Material-UI theme
 const theme = createTheme({

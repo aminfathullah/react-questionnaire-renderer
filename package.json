@@ -1,32 +1,56 @@
 {
-  "name": "rsurvey",
-  "private": true,
-  "version": "0.0.0",
-  "types": "./src/types.d.ts",
+  "name": "react-questionnaire-renderer",
+  "version": "0.1.0",
+  "description": "Flexible React questionnaire renderer with autosave, validation, and custom layouts.",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.es.js",
+  "types": "./src/types.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/types.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src/types.d.ts"
+  ],
+  "sideEffects": false,
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:watch": "vite build --watch",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest"
   },
+  "keywords": [
+    "react",
+    "questionnaire",
+    "survey",
+    "form",
+    "renderer"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "@emotion/react": ">=11",
+    "@emotion/styled": ">=11",
+    "@mui/icons-material": ">=5",
+    "@mui/material": ">=5",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.2",
-    "@mui/material": "^7.3.2",
-    "@testing-library/jest-dom": "^6.8.0",
-    "@testing-library/react": "^16.3.0",
-    "jsdom": "^27.0.0",
-    "localforage": "^1.10.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.1",
-    "vitest": "^3.2.4"
+    "localforage": "^1.10.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
@@ -34,7 +58,12 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.4.0",
+    "jsdom": "^27.0.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.1",
     "vite": "^7.1.6",
+    "vitest": "^3.2.4",
     "workbox-cli": "^7.3.0"
   }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TextField, Typography, Box, InputAdornment } from '@mui/material';
+import { TextField, Typography, Box } from '@mui/material';
 import { useQuestionnaire, validateQuestion } from '../../hooks/useQuestionnaire';
 import ErrorMessage from '../common/ErrorMessage';
 

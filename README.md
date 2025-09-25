@@ -13,6 +13,18 @@ This project provides a configurable questionnaire renderer for React applicatio
 
 ## Getting Started
 
+### Installation (library consumers)
+
+```bash
+yarn add react-questionnaire-renderer
+# or
+npm install react-questionnaire-renderer
+```
+
+Ensure your project also installs the peer dependencies: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`, `@emotion/react`, and `@emotion/styled`.
+
+### Local development (this repo)
+
 ```bash
 # install dependencies
 npm install

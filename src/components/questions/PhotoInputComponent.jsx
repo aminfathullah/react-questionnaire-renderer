@@ -15,11 +15,13 @@ import {
   PhotoCamera,
   CloudUpload,
   Delete,
-  CameraAlt,
-  Image as ImageIcon
+  CameraAlt
 } from '@mui/icons-material';
 import { useQuestionnaire, validateQuestion } from '../../hooks/useQuestionnaire';
 import ErrorMessage from '../common/ErrorMessage';
+
+const SUPPORTED_FORMATS = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const PhotoInputComponent = ({
   question,
@@ -89,20 +91,16 @@ const PhotoInputComponent = ({
   const questionLabel = question.label || question.title || question.name || '';
   const { mainLabel, helpText } = parseLabel(questionLabel);
 
-  // Supported file formats
-  const supportedFormats = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  const maxFileSize = 10 * 1024 * 1024; // 10MB
-
   // Validate file
-  const validateFile = (file) => {
-    if (!supportedFormats.includes(file.type)) {
+  const validateFile = useCallback((file) => {
+    if (!SUPPORTED_FORMATS.includes(file.type)) {
       return 'Format file tidak didukung. Gunakan JPG, PNG, atau WebP.';
     }
-    if (file.size > maxFileSize) {
+    if (file.size > MAX_FILE_SIZE) {
       return 'Ukuran file terlalu besar. Maksimal 10MB.';
     }
     return null;
-  };
+  }, []);
 
   // Handle file selection from input
   const handleFileSelect = useCallback(async (file) => {
@@ -141,7 +139,7 @@ const PhotoInputComponent = ({
       setError(question.dataKey, 'Error memproses file.');
       setIsLoading(false);
     }
-  }, [onChange, question.dataKey, setError]);
+  }, [onChange, question.dataKey, setError, validateFile]);
 
   // Handle camera capture
   const handleCameraCapture = useCallback(async () => {
