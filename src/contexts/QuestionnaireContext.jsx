@@ -72,6 +72,8 @@ const initialState = {
 function questionnaireReducer(state, action) {
   switch (action.type) {
     case ActionTypes.SET_QUESTIONNAIRE:
+      // Avoid setting same questionnaire/template repeatedly to prevent render loops
+      if (isDeepEqual(state.template, action.payload)) return state;
       return {
         ...state,
         questionnaire: action.payload,
@@ -79,6 +81,7 @@ function questionnaireReducer(state, action) {
       };
     
     case ActionTypes.SET_VALIDATION:
+      if (isDeepEqual(state.validation, action.payload)) return state;
       return { ...state, validation: action.payload };
     
     case ActionTypes.SET_CURRENT_PAGE:
@@ -178,19 +181,47 @@ function questionnaireReducer(state, action) {
       };
 
     case ActionTypes.SET_RUNTIME_METHODS:
-      return {
-        ...state,
-        runtime: action.payload
-      };
+      // runtime usually holds function refs. Do a shallow referential equality
+      // check on keys to avoid JSON.stringify on functions and avoid repeated
+      // updates when the functions are unchanged.
+      try {
+        const oldRuntime = state.runtime || null;
+        const newRuntime = action.payload || null;
+        if (oldRuntime === newRuntime) return state;
+        if (oldRuntime && newRuntime && typeof oldRuntime === 'object' && typeof newRuntime === 'object') {
+          const oldKeys = Object.keys(oldRuntime);
+          const newKeys = Object.keys(newRuntime);
+          if (oldKeys.length === newKeys.length && oldKeys.every(k => newKeys.includes(k))) {
+            const allSame = oldKeys.every((k) => oldRuntime[k] === newRuntime[k]);
+            if (allSame) return state;
+          }
+        }
+        return {
+          ...state,
+          runtime: action.payload
+        };
+      } catch {
+        return {
+          ...state,
+          runtime: action.payload
+        };
+      }
 
     case ActionTypes.SET_CONFIG:
-      return {
-        ...state,
-        config: {
-          ...state.config,
-          ...(action.payload || {})
-        }
-      };
+      // Merge incoming config and avoid returning a new object if nothing changed
+      try {
+        const nextConfig = { ...state.config, ...(action.payload || {}) };
+        if (isDeepEqual(state.config, nextConfig)) return state;
+        return {
+          ...state,
+          config: nextConfig
+        };
+      } catch {
+        return {
+          ...state,
+          config: { ...state.config, ...(action.payload || {}) }
+        };
+      }
     
     default:
       return state;

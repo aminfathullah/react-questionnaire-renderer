@@ -126,21 +126,23 @@ const QuestionnaireRendererInner = forwardRef((props, ref) => {
   }, [templateJson, validationJson, validation, loadQuestionnaire, handleError]);
 
   // Apply global config for consumers/layout/questions
+  const memoizedConfig = useMemo(() => ({
+    readOnly,
+    disabled,
+    locale,
+    translations,
+    fetchMedia,
+    theme,
+    componentsMap: componentsMap || {}
+  }), [readOnly, disabled, locale, translations, fetchMedia, theme, componentsMap]);
+
   useEffect(() => {
     try {
-      setConfig({
-        readOnly,
-        disabled,
-        locale,
-        translations,
-        fetchMedia,
-        theme,
-        componentsMap: componentsMap || {}
-      });
+      setConfig(memoizedConfig);
     } catch (error) {
       handleError(error);
     }
-  }, [readOnly, disabled, locale, translations, fetchMedia, theme, componentsMap, setConfig, handleError]);
+  }, [memoizedConfig, setConfig, handleError]);
 
   // Hydrate initial responses when they change meaningfully
   useEffect(() => {
@@ -301,16 +303,30 @@ const QuestionnaireRendererInner = forwardRef((props, ref) => {
     getResponses: getCurrentResponses
   }), [handleSubmit, handleReset, getCurrentResponses]);
 
+  // Keep stable runtime function identities by storing the current
+  // implementations in refs and exposing wrapper functions that
+  // call the refs. This prevents effects from dispatching a new
+  // runtime object on every render and causing render loops.
+  const handleSubmitRef = useRef(handleSubmit);
+  const handleResetRef = useRef(handleReset);
+  const getCurrentResponsesRef = useRef(getCurrentResponses);
+
+  useEffect(() => { handleSubmitRef.current = handleSubmit; }, [handleSubmit]);
+  useEffect(() => { handleResetRef.current = handleReset; }, [handleReset]);
+  useEffect(() => { getCurrentResponsesRef.current = getCurrentResponses; }, [getCurrentResponses]);
+
+  const stableRuntime = useMemo(() => ({
+    submit: (...args) => handleSubmitRef.current(...args),
+    reset: (...args) => handleResetRef.current(...args),
+    getResponses: (...args) => getCurrentResponsesRef.current(...args)
+  }), []);
+
   useEffect(() => {
-    setRuntimeMethods({
-      submit: handleSubmit,
-      reset: handleReset,
-      getResponses: getCurrentResponses
-    });
+    setRuntimeMethods(stableRuntime);
     return () => {
       setRuntimeMethods(null);
     };
-  }, [setRuntimeMethods, handleSubmit, handleReset, getCurrentResponses]);
+  }, [setRuntimeMethods, stableRuntime]);
 
   const LayoutComponent = useMemo(() => resolveLayoutComponent(layout), [layout]);
 
