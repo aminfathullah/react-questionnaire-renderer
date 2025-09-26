@@ -1,4 +1,10 @@
-import React, { createContext, useReducer, useEffect, useCallback } from 'react';
+import React, { createContext, useReducer, useEffect, useCallback, useRef } from 'react';
+import {
+  buildLookupCacheKey,
+  readLookupCache,
+  writeLookupCache,
+  fetchLookupSource
+} from '../utils/lookups';
 
 const QuestionnaireContext = createContext();
 
@@ -18,7 +24,9 @@ const ActionTypes = {
   RESET_RESPONSES: 'RESET_RESPONSES',
   SET_ERRORS: 'SET_ERRORS',
   SET_RUNTIME_METHODS: 'SET_RUNTIME_METHODS',
-  SET_CONFIG: 'SET_CONFIG'
+  SET_CONFIG: 'SET_CONFIG',
+  SET_LOOKUP_ENTRY: 'SET_LOOKUP_ENTRY',
+  SET_LOOKUP_STATUS: 'SET_LOOKUP_STATUS'
 };
 
 const safeNavigator = typeof navigator !== 'undefined' ? navigator : undefined;
@@ -65,8 +73,14 @@ const initialState = {
     translations: {},
     fetchMedia: null,
     theme: null,
-    componentsMap: {}
-  }
+    componentsMap: {},
+    lookupClient: null,
+    lookupBaseUrl: null,
+    resolveLookupUrl: null
+  },
+  lookupCache: {},
+  lookupStatus: {},
+  lookupErrors: {}
 };
 
 function questionnaireReducer(state, action) {
@@ -222,6 +236,35 @@ function questionnaireReducer(state, action) {
           config: { ...state.config, ...(action.payload || {}) }
         };
       }
+
+    case ActionTypes.SET_LOOKUP_ENTRY: {
+      const { key, entry } = action.payload || {};
+      if (!key || !entry) return state;
+      const existing = state.lookupCache[key];
+      if (existing && isDeepEqual(existing, entry)) {
+        return {
+          ...state,
+          lookupStatus: { ...state.lookupStatus, [key]: 'loaded' },
+          lookupErrors: { ...state.lookupErrors, [key]: null }
+        };
+      }
+      return {
+        ...state,
+        lookupCache: { ...state.lookupCache, [key]: entry },
+        lookupStatus: { ...state.lookupStatus, [key]: 'loaded' },
+        lookupErrors: { ...state.lookupErrors, [key]: null }
+      };
+    }
+
+    case ActionTypes.SET_LOOKUP_STATUS: {
+      const { key, status, error = null } = action.payload || {};
+      if (!key) return state;
+      return {
+        ...state,
+        lookupStatus: { ...state.lookupStatus, [key]: status },
+        lookupErrors: { ...state.lookupErrors, [key]: error }
+      };
+    }
     
     default:
       return state;
@@ -230,6 +273,7 @@ function questionnaireReducer(state, action) {
 
 export function QuestionnaireProvider({ children }) {
   const [state, dispatch] = useReducer(questionnaireReducer, initialState);
+  const pendingLookupsRef = useRef(new Map());
 
   // Monitor online/offline status
   useEffect(() => {
@@ -321,6 +365,62 @@ export function QuestionnaireProvider({ children }) {
     dispatch({ type: ActionTypes.SET_CONFIG, payload: config });
   }, []);
 
+  const ensureLookupDataset = useCallback(async (sourceDefinition = {}) => {
+    const cacheKey = buildLookupCacheKey(sourceDefinition);
+    const cached = state.lookupCache[cacheKey];
+    if (cached && Array.isArray(cached.data)) {
+      return cached.data;
+    }
+
+    const pending = pendingLookupsRef.current.get(cacheKey);
+    if (pending) {
+      return pending;
+    }
+
+    const loaderPromise = (async () => {
+      try {
+        const stored = await readLookupCache(cacheKey);
+        if (stored && Array.isArray(stored.data)) {
+          dispatch({
+            type: ActionTypes.SET_LOOKUP_ENTRY,
+            payload: { key: cacheKey, entry: stored }
+          });
+          return stored.data;
+        }
+
+        dispatch({
+          type: ActionTypes.SET_LOOKUP_STATUS,
+          payload: { key: cacheKey, status: 'loading', error: null }
+        });
+
+        const fetchedRows = await fetchLookupSource(sourceDefinition, state.config);
+        const entry = {
+          data: fetchedRows,
+          version: sourceDefinition.version || null,
+          fetchedAt: new Date().toISOString()
+        };
+        dispatch({
+          type: ActionTypes.SET_LOOKUP_ENTRY,
+          payload: { key: cacheKey, entry }
+        });
+        await writeLookupCache(cacheKey, entry);
+        return fetchedRows;
+      } catch (error) {
+        const message = error && error.message ? error.message : String(error);
+        dispatch({
+          type: ActionTypes.SET_LOOKUP_STATUS,
+          payload: { key: cacheKey, status: 'error', error: message }
+        });
+        throw error;
+      } finally {
+        pendingLookupsRef.current.delete(cacheKey);
+      }
+    })();
+
+    pendingLookupsRef.current.set(cacheKey, loaderPromise);
+    return loaderPromise;
+  }, [state.lookupCache, state.config, dispatch]);
+
   const value = {
     ...state,
     setQuestionnaire,
@@ -337,7 +437,8 @@ export function QuestionnaireProvider({ children }) {
     resetResponses,
     setErrors,
     setRuntimeMethods,
-    setConfig
+    setConfig,
+    ensureLookupDataset
   };
 
   return (

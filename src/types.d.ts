@@ -29,6 +29,35 @@ export type QuestionnaireValidator = (
   context: QuestionnaireValidatorContext
 ) => string | null | Promise<string | null>;
 
+export interface QuestionnaireLookupParentCondition {
+  key: string;
+  value: unknown;
+}
+
+export interface QuestionnaireLookupSource {
+  id?: string;
+  tableName?: string;
+  fileName?: string;
+  cacheKey?: string;
+  value: string;
+  desc?: string;
+  fullDesc?: string;
+  version?: string;
+  url?: string;
+  parentCondition?: QuestionnaireLookupParentCondition[];
+  requestConfig?: Record<string, unknown>;
+}
+
+export interface QuestionnaireLookupEntry {
+  data: any[];
+  version: string | null;
+  fetchedAt?: string;
+}
+
+export interface QuestionnaireLookupClient {
+  get: (url: string, config?: Record<string, unknown>) => Promise<any>;
+}
+
 export interface QuestionnaireConfig {
   readOnly?: boolean;
   disabled?: boolean;
@@ -37,6 +66,9 @@ export interface QuestionnaireConfig {
   fetchMedia?: (mediaRef: unknown) => Promise<string | Blob>;
   theme?: unknown;
   componentsMap?: Record<string | number, ComponentType<any> | ReactNode>;
+  lookupClient?: QuestionnaireLookupClient | null;
+  lookupBaseUrl?: string | null;
+  resolveLookupUrl?: (source: QuestionnaireLookupSource, config: QuestionnaireConfig) => string | null;
 }
 
 export interface QuestionnaireRendererProps extends QuestionnaireConfig {
@@ -55,6 +87,9 @@ export interface QuestionnaireRendererProps extends QuestionnaireConfig {
   asyncValidation?: boolean;
   fetchMedia?: QuestionnaireConfig['fetchMedia'];
   onError?: (error: Error) => void;
+  lookupClient?: QuestionnaireLookupClient | null;
+  lookupBaseUrl?: string | null;
+  resolveLookupUrl?: QuestionnaireConfig['resolveLookupUrl'];
   className?: string;
   style?: CSSProperties;
   children?: ReactNode;
@@ -88,6 +123,9 @@ export interface QuestionnaireContextValue {
   isDirty: boolean;
   validationState: 'unknown' | 'valid' | 'invalid';
   config: QuestionnaireConfig;
+  lookupCache: Record<string, QuestionnaireLookupEntry>;
+  lookupStatus: Record<string, 'idle' | 'loading' | 'loaded' | 'error'>;
+  lookupErrors: Record<string, string | null>;
   setQuestionnaire: (template: Record<string, unknown>) => void;
   setValidation: (validation: unknown) => void;
   setCurrentPage: (page: number) => void;
@@ -103,6 +141,7 @@ export interface QuestionnaireContextValue {
   setErrors: (errors: QuestionnaireValidationErrors) => void;
   setRuntimeMethods: (runtime: QuestionnaireRuntimeHandle | null) => void;
   setConfig: (config: QuestionnaireConfig) => void;
+  ensureLookupDataset: (source: QuestionnaireLookupSource) => Promise<any[]>;
   submit: QuestionnaireRuntimeHandle['submit'] | null;
   reset: QuestionnaireRuntimeHandle['reset'] | null;
   getResponses: QuestionnaireRuntimeHandle['getResponses'] | null;

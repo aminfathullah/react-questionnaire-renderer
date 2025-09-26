@@ -69,6 +69,9 @@ const QuestionnaireRendererInner = forwardRef((props, ref) => {
     asyncValidation = false,
     fetchMedia = null,
     onError = null,
+    lookupClient = null,
+    lookupBaseUrl = null,
+    resolveLookupUrl = null,
     className,
     style,
     children,
@@ -133,8 +136,11 @@ const QuestionnaireRendererInner = forwardRef((props, ref) => {
     translations,
     fetchMedia,
     theme,
-    componentsMap: componentsMap || {}
-  }), [readOnly, disabled, locale, translations, fetchMedia, theme, componentsMap]);
+    componentsMap: componentsMap || {},
+    lookupClient,
+    lookupBaseUrl,
+    resolveLookupUrl
+  }), [readOnly, disabled, locale, translations, fetchMedia, theme, componentsMap, lookupClient, lookupBaseUrl, resolveLookupUrl]);
 
   useEffect(() => {
     try {
@@ -385,6 +391,9 @@ const QuestionnaireRenderer = forwardRef((props, ref) => {
     asyncValidation,
     fetchMedia,
     onError,
+    lookupClient,
+    lookupBaseUrl,
+    resolveLookupUrl,
     className,
     style,
     children,
@@ -425,6 +434,9 @@ const QuestionnaireRenderer = forwardRef((props, ref) => {
         asyncValidation={asyncValidation}
         fetchMedia={fetchMedia}
         onError={onError}
+        lookupClient={lookupClient}
+        lookupBaseUrl={lookupBaseUrl}
+        resolveLookupUrl={resolveLookupUrl}
         className={className}
         style={style}
         {...layoutProps}
