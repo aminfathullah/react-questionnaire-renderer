@@ -148,6 +148,60 @@ rendererRef.current?.submit();
 
 For custom question components or layout overrides, pass a `componentsMap` or a custom `layout` component—see the props table above for details.
 
+### Lookup-backed Selects (type 27)
+
+Type `27` questions (`Select`/lookup) support loading option lists from external lookup datasets. The question `sourceSelect` entry describes which lookup to use, which field provides the option `value`, which field is the `desc` (label), and optional `parentCondition` entries to filter rows based on other answers.
+
+Example `sourceSelect` fragment from a question definition:
+
+```json
+{
+	"id": "42e5a19c-f0b4-4194-ae0c-703cfb6a0042",
+	"version": "1",
+	"tableName": "mfd24_kab_kota",
+	"value": "kdprovkab",
+	"desc": "namakab",
+	"parentCondition": [{ "key": "kdprov", "value": "r111" }]
+}
+```
+
+How it works:
+- On mount, the renderer asks the context to `ensureLookupDataset(source)` for each `sourceSelect` entry used by rendered questions.
+- The dataset loader first checks the in-browser cache (`localforage`) using a stable cache key. If not present it fetches the JSON from `lookupBaseUrl` (default `/lookup/<id>.json`) or by calling your provided `lookupClient.get(url)`.
+- Loaded datasets are cached in memory and persisted to `localforage` for offline-friendly usage.
+- If a `parentCondition` is present the renderer will filter lookup rows so only relevant options are shown.
+
+Configuring lookup transport
+- `lookupBaseUrl` (string) — base path used when resolving lookup files. If your lookup JSON files live at `/lookup/*.json` (as in this repo) you don't need to change it.
+- `resolveLookupUrl` (fn) — optional function `(source, config) => string|null` to fully control URL resolution per source.
+- `lookupClient` (object) — optional custom client with a `get(url, config)` method. Useful to pass an axios-like client for auth headers or custom timeouts.
+
+Example wiring with axios in your app:
+
+```jsx
+import axios from 'axios';
+import QuestionnaireRenderer from 'react-questionnaire-renderer';
+
+const apiClient = axios.create({ baseURL: 'https://api.example.com' });
+
+<QuestionnaireRenderer
+	templateJson={templateJson}
+	lookupClient={{ get: (url) => apiClient.get(url) }}
+	lookupBaseUrl="/lookup"
+	// or custom resolver:
+	// resolveLookupUrl={(src) => `https://cdn.example.com/lookups/${src.id}.json`}
+/>
+```
+
+Local testing with the included `lookup/` folder
+- This repository includes a `lookup/` folder with sample JSON files (e.g., `42e5a19c-f0b4-4194-ae0c-703cfb6a0042.json`). When running the dev server (`npm run dev`) these files are served at `/lookup/<filename>.json` so lookup-backed selects will work out-of-the-box in the demo.
+
+Notes, caveats and behavior
+- The Select component will show a "Loading options..." placeholder while datasets are being fetched. Selections made before datasets finish loading are preserved.
+- If a saved selection no longer exists in the filtered dataset (for example the parent condition changed) the selection is cleared to avoid orphaned values. If you prefer to keep stale values, we can add a config flag to opt in.
+- Lookups are cached by a stable cache key derived from the source metadata; update the `version` field on your source to trigger a refresh.
+- If you need per-request headers (auth tokens, etc.) use `lookupClient.get(url)` to integrate your existing network layer.
+
 ## `<QuestionnaireRenderer />` Props
 
 | Prop | Type | Required | Description |
