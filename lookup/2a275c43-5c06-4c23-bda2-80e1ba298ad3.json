@@ -1,0 +1,42 @@
+[
+        {
+            "kdprovkabkec": "3578010",
+            "klas": "1",
+            "namadesa": "[001] WARUGUNUNG                                    ",
+            "nmklas": "1-Perkotaan",
+            "kdprovkabkecdesa": "3578010001",
+            "version": "1",
+            "kdprov": "35",
+            "kdprovkab": "3578"
+        },
+        {
+            "kdprovkabkec": "3578010",
+            "klas": "1",
+            "namadesa": "[002] KARANG PILANG                                 ",
+            "nmklas": "1-Perkotaan",
+            "kdprovkabkecdesa": "3578010002",
+            "version": "1",
+            "kdprov": "35",
+            "kdprovkab": "3578"
+        },
+        {
+            "kdprovkabkec": "3578010",
+            "klas": "1",
+            "namadesa": "[003] KEBRAON                                       ",
+            "nmklas": "1-Perkotaan",
+            "kdprovkabkecdesa": "3578010003",
+            "version": "1",
+            "kdprov": "35",
+            "kdprovkab": "3578"
+        },
+        {
+            "kdprovkabkec": "3578010",
+            "klas": "1",
+            "namadesa": "[004] KEDURUS                                       ",
+            "nmklas": "1-Perkotaan",
+            "kdprovkabkecdesa": "3578010004",
+            "version": "1",
+            "kdprov": "35",
+            "kdprovkab": "3578"
+        }
+    ]

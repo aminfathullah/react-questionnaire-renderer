@@ -1,0 +1,192 @@
+[
+        {
+            "namaprov": "[11] ACEH",
+            "version": "1",
+            "kdprov": "11"
+        },
+        {
+            "namaprov": "[12] SUMATERA UTARA",
+            "version": "1",
+            "kdprov": "12"
+        },
+        {
+            "namaprov": "[13] SUMATERA BARAT",
+            "version": "1",
+            "kdprov": "13"
+        },
+        {
+            "namaprov": "[14] RIAU",
+            "version": "1",
+            "kdprov": "14"
+        },
+        {
+            "namaprov": "[15] JAMBI",
+            "version": "1",
+            "kdprov": "15"
+        },
+        {
+            "namaprov": "[16] SUMATERA SELATAN",
+            "version": "1",
+            "kdprov": "16"
+        },
+        {
+            "namaprov": "[17] BENGKULU",
+            "version": "1",
+            "kdprov": "17"
+        },
+        {
+            "namaprov": "[18] LAMPUNG",
+            "version": "1",
+            "kdprov": "18"
+        },
+        {
+            "namaprov": "[19] KEPULAUAN BANGKA BELITUNG",
+            "version": "1",
+            "kdprov": "19"
+        },
+        {
+            "namaprov": "[21] KEPULAUAN RIAU",
+            "version": "1",
+            "kdprov": "21"
+        },
+        {
+            "namaprov": "[31] DKI JAKARTA",
+            "version": "1",
+            "kdprov": "31"
+        },
+        {
+            "namaprov": "[32] JAWA BARAT",
+            "version": "1",
+            "kdprov": "32"
+        },
+        {
+            "namaprov": "[33] JAWA TENGAH",
+            "version": "1",
+            "kdprov": "33"
+        },
+        {
+            "namaprov": "[34] DI YOGYAKARTA",
+            "version": "1",
+            "kdprov": "34"
+        },
+        {
+            "namaprov": "[35] JAWA TIMUR",
+            "version": "1",
+            "kdprov": "35"
+        },
+        {
+            "namaprov": "[36] BANTEN",
+            "version": "1",
+            "kdprov": "36"
+        },
+        {
+            "namaprov": "[51] BALI",
+            "version": "1",
+            "kdprov": "51"
+        },
+        {
+            "namaprov": "[52] NUSA TENGGARA BARAT",
+            "version": "1",
+            "kdprov": "52"
+        },
+        {
+            "namaprov": "[53] NUSA TENGGARA TIMUR",
+            "version": "1",
+            "kdprov": "53"
+        },
+        {
+            "namaprov": "[61] KALIMANTAN BARAT",
+            "version": "1",
+            "kdprov": "61"
+        },
+        {
+            "namaprov": "[62] KALIMANTAN TENGAH",
+            "version": "1",
+            "kdprov": "62"
+        },
+        {
+            "namaprov": "[63] KALIMANTAN SELATAN",
+            "version": "1",
+            "kdprov": "63"
+        },
+        {
+            "namaprov": "[64] KALIMANTAN TIMUR",
+            "version": "1",
+            "kdprov": "64"
+        },
+        {
+            "namaprov": "[65] KALIMANTAN UTARA",
+            "version": "1",
+            "kdprov": "65"
+        },
+        {
+            "namaprov": "[71] SULAWESI UTARA",
+            "version": "1",
+            "kdprov": "71"
+        },
+        {
+            "namaprov": "[72] SULAWESI TENGAH",
+            "version": "1",
+            "kdprov": "72"
+        },
+        {
+            "namaprov": "[73] SULAWESI SELATAN",
+            "version": "1",
+            "kdprov": "73"
+        },
+        {
+            "namaprov": "[74] SULAWESI TENGGARA",
+            "version": "1",
+            "kdprov": "74"
+        },
+        {
+            "namaprov": "[75] GORONTALO",
+            "version": "1",
+            "kdprov": "75"
+        },
+        {
+            "namaprov": "[76] SULAWESI BARAT",
+            "version": "1",
+            "kdprov": "76"
+        },
+        {
+            "namaprov": "[81] MALUKU",
+            "version": "1",
+            "kdprov": "81"
+        },
+        {
+            "namaprov": "[82] MALUKU UTARA",
+            "version": "1",
+            "kdprov": "82"
+        },
+        {
+            "namaprov": "[91] PAPUA BARAT",
+            "version": "1",
+            "kdprov": "91"
+        },
+        {
+            "namaprov": "[92] PAPUA BARAT DAYA",
+            "version": "1",
+            "kdprov": "92"
+        },
+        {
+            "namaprov": "[94] PAPUA",
+            "version": "1",
+            "kdprov": "94"
+        },
+        {
+            "namaprov": "[95] PAPUA SELATAN",
+            "version": "1",
+            "kdprov": "95"
+        },
+        {
+            "namaprov": "[96] PAPUA TENGAH",
+            "version": "1",
+            "kdprov": "96"
+        },
+        {
+            "namaprov": "[97] PAPUA PEGUNUNGAN",
+            "version": "1",
+            "kdprov": "97"
+        }
+    ]
