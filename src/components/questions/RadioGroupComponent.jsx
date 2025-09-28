@@ -9,13 +9,17 @@ import {
   Box,
   FormHelperText
 } from '@mui/material';
+import { getValue } from '../../hooks/useQuestionnaire';
 
 const RadioGroupComponent = ({ 
   question, 
   value = '', 
   onChange, 
   error,
-  disabled = false 
+  disabled = false,
+  responses = {},
+  variables = {},
+  rowIndex = null
 }) => {
   const handleChange = (event) => {
     const selectedValue = event.target.value;
@@ -65,6 +69,20 @@ const RadioGroupComponent = ({
         value: cat.value || cat.id,
         text: cat.text || cat.title || cat.label
       }));
+    }
+
+    if (question.sourceOption){
+      // resolve sourceOption using the current responses/variables and rowIndex
+      const sourceOptions = getValue(question.sourceOption, responses, variables, rowIndex) || [];
+
+      // If the source returns an object with nested array, try to extract common shapes
+      if (Array.isArray(sourceOptions)) return sourceOptions;
+
+      // Single option object -> wrap as array
+      if (sourceOptions && typeof sourceOptions === 'object') return [sourceOptions];
+
+      // Primitive -> convert to a single option entry
+      return [{ value: sourceOptions, text: String(sourceOptions) }];
     }
     
     return [];
