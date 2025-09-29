@@ -7,10 +7,8 @@ import React, {
   useState,
   useImperativeHandle
 } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
 import { QuestionnaireProvider } from '../contexts/QuestionnaireContext';
-import '../styles.css';
 import { useQuestionnaire } from '../hooks/useQuestionnaire';
 import QuestionnaireLayout from './QuestionnaireLayout';
 import SimpleQuestionnaireRenderer from './SimpleQuestionnaireRenderer';
@@ -48,33 +46,6 @@ const createDefaultStore = () => {
     }
   };
 };
-
-const createDefaultTheme = () => createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-  },
-  components: {
-    MuiTextField: {
-      defaultProps: {
-        variant: 'outlined',
-      },
-    },
-    MuiButton: {
-      defaultProps: {
-        variant: 'contained',
-      },
-    },
-  },
-});
 
 const QuestionnaireRendererInner = forwardRef((props, ref) => {
   const {
@@ -382,24 +353,18 @@ const QuestionnaireRendererInner = forwardRef((props, ref) => {
     );
   }
 
-  const effectiveTheme = theme || createDefaultTheme();
-  
-  if (theme && React.isValidElement(theme)) {
-    return React.cloneElement(theme, undefined, <><CssBaseline />{content}</>);
+  if (theme) {
+    if (React.isValidElement(theme)) {
+      return React.cloneElement(theme, undefined, content);
+    }
+    if (typeof theme === 'function') {
+      const ThemedWrapper = theme;
+      return <ThemedWrapper>{content}</ThemedWrapper>;
+    }
+    return <ThemeProvider theme={theme}>{content}</ThemeProvider>;
   }
-  if (theme && typeof theme === 'function') {
-    const ThemedWrapper = theme;
-    return <ThemedWrapper><CssBaseline />{content}</ThemedWrapper>;
-  }
-  
-  return (
-    <ThemeProvider theme={effectiveTheme}>
-      <CssBaseline />
-      <div className="questionnaire-renderer">
-        {content}
-      </div>
-    </ThemeProvider>
-  );
+
+  return content;
 });
 
 QuestionnaireRendererInner.displayName = 'QuestionnaireRendererInner';

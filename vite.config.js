@@ -34,17 +34,10 @@ export default defineConfig(({ command }) => ({
           '@emotion/react': 'emotionReact',
           '@emotion/styled': 'emotionStyled',
         },
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            return 'styles.css';
-          }
-          return assetInfo.name;
-        },
       },
     },
     sourcemap: true,
     minify: command === 'build',
-    cssCodeSplit: false,
   },
   test: {
     globals: true,

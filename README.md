@@ -23,13 +23,7 @@ yarn add react-questionnaire-renderer
 npm install react-questionnaire-renderer
 ```
 
-**Required peer dependencies**: Ensure your project also installs the peer dependencies: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`, `@emotion/react`, and `@emotion/styled`.
-
-```bash
-npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
-```
-
-**Important**: The QuestionnaireRenderer includes a built-in Material-UI theme and CssBaseline, so it works out-of-the-box without additional theme setup. However, if you want to use your own theme, you can pass it via the `theme` prop.
+Ensure your project also installs the peer dependencies: `react`, `react-dom`, `@mui/material`, `@mui/icons-material`, `@emotion/react`, and `@emotion/styled`.
 
 #### When hosted on GitHub only
 
@@ -153,61 +147,6 @@ rendererRef.current?.submit();
 ```
 
 For custom question components or layout overrides, pass a `componentsMap` or a custom `layout` component—see the props table above for details.
-
-## Styling and Layout
-
-The QuestionnaireRenderer comes with built-in styles and a Material-UI theme that ensure the sidebar navigation, burger menu, and sticky elements work correctly. The component automatically includes:
-
-- **CssBaseline**: Material-UI's CSS reset for consistent styling
-- **Default theme**: A complete Material-UI theme if none is provided
-- **Responsive layout**: Mobile-friendly sidebar that collapses to a drawer
-- **Sticky navigation**: Bottom navigation bar that stays in place
-
-### Using with your existing theme
-
-If you already have a Material-UI theme in your app, you can either:
-
-1. **Let the component use its own theme** (recommended for isolation):
-```jsx
-<QuestionnaireRenderer templateJson={templateJson} />
-```
-
-2. **Pass your theme to the component**:
-```jsx
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-const myTheme = createTheme({ /* your theme config */ });
-
-<QuestionnaireRenderer 
-  templateJson={templateJson}
-  theme={myTheme}
-/>
-```
-
-3. **Wrap with your own ThemeProvider** (not recommended as it may cause conflicts):
-```jsx
-<ThemeProvider theme={myTheme}>
-  <QuestionnaireRenderer templateJson={templateJson} theme={null} />
-</ThemeProvider>
-```
-
-### Troubleshooting Layout Issues
-
-If you're experiencing issues with the sidebar navigation or burger menu not appearing:
-
-1. **Ensure peer dependencies are installed**: The component needs `@mui/material` and `@mui/icons-material` to render correctly.
-
-2. **Check for theme conflicts**: If you have your own Material-UI theme, make sure it's not conflicting with the component's layout.
-
-3. **Verify CSS loading**: The component includes its own CSS for layout fixes. If styles aren't loading, ensure your bundler supports CSS imports in JavaScript files.
-
-4. **Container styling**: The QuestionnaireRenderer is designed to fill its container. Ensure the parent container has appropriate dimensions:
-
-```jsx
-<div style={{ height: '100vh', width: '100%' }}>
-  <QuestionnaireRenderer templateJson={templateJson} />
-</div>
-```
 
 ### Lookup-backed Selects (type 27)
 

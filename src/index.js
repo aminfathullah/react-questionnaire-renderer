@@ -9,9 +9,6 @@ export {
   deserializeResponses
 } from './utils/responses';
 
-// Import styles to ensure they're included in the build
-import './styles.css';
-
 export const types = Object.freeze({
   QuestionnaireRendererProps: 'QuestionnaireRendererProps',
   QuestionnaireRuntimeHandle: 'QuestionnaireRuntimeHandle',
