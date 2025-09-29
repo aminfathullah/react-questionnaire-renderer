@@ -7184,7 +7184,6 @@ const Tl = (e) => !e || e === "default" ? po : e === "simple" ? yl : e, Cl = () 
     locale: h,
     translations: b
   }), [r, n, Y, fe, A, G, R, M, h, b]), Re = re(() => it(I), [I]), qe = re(() => !K || !J ? Promise.resolve() : Promise.resolve(J.remove?.(g)).catch(z), [K, J, g, z]), De = re(async () => {
-    console.log("handleSubmit called");
     try {
       const X = await ke();
       return d(X.errors), X.valid ? (typeof s == "function" && (console.log("Submitting responses:", fe), await Promise.resolve(s(fe))), v?.clearOnSubmit && await qe(), { ok: !0, responses: fe }) : (Object.keys(X.errors).forEach((de) => O(de)), typeof u == "function" && u(X.errors), { ok: !1, errors: X.errors });
