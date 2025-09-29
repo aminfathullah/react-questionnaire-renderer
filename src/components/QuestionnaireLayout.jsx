@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Box,
   Drawer,
@@ -64,13 +64,28 @@ function QuestionnaireLayout({
     errors,
     validation,
     setCurrentPage,
-    template
+    template,
+    submit
   } = useQuestionnaire();
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const effectiveTemplate = templateOverride || template;
   const sections = useMemo(() => extractSections(effectiveTemplate), [effectiveTemplate]);
+
+  const canSubmit = Boolean(submit);
+
+  const handleSubmit = useCallback(async () => {
+    if (!submit) {
+      console.warn('Submit handler is not available yet.');
+      return;
+    }
+    try {
+      await submit();
+    } catch (error) {
+      console.error('Failed to submit questionnaire:', error);
+    }
+  }, [submit]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -213,6 +228,8 @@ function QuestionnaireLayout({
             label="Submit"
             color="secondary"
             clickable
+            onClick={handleSubmit}
+            disabled={!canSubmit}
             sx={{ color: 'white', fontWeight: 600 }}
           />
         </Toolbar>
@@ -303,14 +320,27 @@ function QuestionnaireLayout({
                 {currentSection?.label || 'No section selected'}
               </Typography>
 
-              <Button
-                variant="contained"
-                onClick={() => handleSectionClick(Math.min(sections.length - 1, currentPage + 1))}
-                disabled={currentPage >= sections.length - 1}
-                sx={{ minWidth: 120 }}
-              >
-                Next
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="contained"
+                  onClick={() => handleSectionClick(Math.min(sections.length - 1, currentPage + 1))}
+                  disabled={currentPage >= sections.length - 1}
+                  sx={{ minWidth: 120 }}
+                >
+                  Next
+                </Button>
+                {sections.length > 0 && (
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleSubmit}
+                    disabled={!canSubmit}
+                    sx={{ minWidth: 120 }}
+                  >
+                    Submit
+                  </Button>
+                )}
+              </Box>
             </Box>
           </Paper>
         </Container>

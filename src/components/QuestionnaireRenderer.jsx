@@ -279,6 +279,7 @@ const QuestionnaireRendererInner = forwardRef((props, ref) => {
       }
 
       if (typeof onSubmit === 'function') {
+        console.log('Submitting responses:', normalizedResponses);
         await Promise.resolve(onSubmit(normalizedResponses));
       }
 
