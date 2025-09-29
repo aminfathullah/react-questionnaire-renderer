@@ -1,0 +1,57 @@
+/* Essential styles for QuestionnaireRenderer */
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure proper layout for the questionnaire */
+.questionnaire-renderer {
+  min-height: 100vh;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
+/* Ensure proper sticky positioning */
+.questionnaire-layout {
+  position: relative;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 900px) {
+  .questionnaire-renderer .MuiDrawer-root .MuiDrawer-paper {
+    width: 280px;
+  }
+  
+  .questionnaire-renderer .MuiAppBar-root {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}
+
+/* Desktop fixes */
+@media (min-width: 900px) {
+  .questionnaire-renderer .MuiDrawer-root .MuiDrawer-paper {
+    position: fixed;
+    top: 0;
+    height: 100vh;
+  }
+  
+  .questionnaire-renderer .MuiAppBar-root {
+    position: fixed;
+  }
+}
+
+/* Ensure sticky bottom navigation */
+.questionnaire-bottom-nav {
+  position: fixed !important;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+/* Fix for potential theme issues */
+.questionnaire-renderer .MuiCssBaseline-root {
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #fff;
+}

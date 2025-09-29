@@ -188,12 +188,13 @@ function QuestionnaireLayout({
   );
 
   return (
-    <Box sx={{ display: 'flex' }} className={className} style={style}>
+    <Box sx={{ display: 'flex' }} className={`questionnaire-layout ${className || ''}`} style={style}>
       <AppBar
         position="fixed"
         sx={{
           width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
           ml: { md: `${DRAWER_WIDTH}px` },
+          zIndex: (theme) => theme.zIndex.drawer + 1,
         }}
       >
         <Toolbar>
@@ -233,6 +234,9 @@ function QuestionnaireLayout({
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: DRAWER_WIDTH,
+              position: isMobile ? 'absolute' : 'fixed',
+              height: '100vh',
+              top: 0,
             },
           }}
         >
@@ -268,6 +272,7 @@ function QuestionnaireLayout({
 
           {/* Sticky Navigation buttons */}
           <Paper
+            className="questionnaire-bottom-nav"
             elevation={3}
             sx={{
               position: 'fixed',
