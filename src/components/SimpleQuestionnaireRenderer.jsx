@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   Box,
   Container,
@@ -38,12 +38,14 @@ function SimpleQuestionnaireRenderer({ template: templateOverride, className, st
     isOnline,
     validation,
     setCurrentPage,
-    template
+    template,
+    submit
   } = useQuestionnaire();
 
   const effectiveTemplate = templateOverride || template;
   const sections = useMemo(() => extractSections(effectiveTemplate), [effectiveTemplate]);
   const currentSection = sections[currentPage];
+  const canSubmit = Boolean(submit);
 
   const handleNext = () => {
     if (currentPage < sections.length - 1) {
@@ -56,6 +58,18 @@ function SimpleQuestionnaireRenderer({ template: templateOverride, className, st
       setCurrentPage(currentPage - 1);
     }
   };
+
+  const handleSubmit = useCallback(async () => {
+    if (!submit) {
+      console.warn('Submit handler is not available yet.');
+      return;
+    }
+    try {
+      await submit();
+    } catch (error) {
+      console.error('Failed to submit questionnaire:', error);
+    }
+  }, [submit]);
 
   const renderSectionQuestions = (section) => {
     if (!section?.components) {
@@ -115,7 +129,7 @@ function SimpleQuestionnaireRenderer({ template: templateOverride, className, st
         <Alert severity="info">No sections available</Alert>
       )}
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
         <Button 
           variant="outlined" 
           onClick={handlePrev}
@@ -123,14 +137,26 @@ function SimpleQuestionnaireRenderer({ template: templateOverride, className, st
         >
           Previous
         </Button>
-        
-        <Button 
-          variant="contained" 
-          onClick={handleNext}
-          disabled={currentPage >= sections.length - 1}
-        >
-          Next
-        </Button>
+
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button 
+            variant="contained" 
+            onClick={handleNext}
+            disabled={currentPage >= sections.length - 1}
+          >
+            Next
+          </Button>
+          {sections.length > 0 && (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleSubmit}
+              disabled={!canSubmit}
+            >
+              Submit
+            </Button>
+          )}
+        </Box>
       </Box>
 
       {footer}
