@@ -81,7 +81,30 @@ function QuestionRenderer({
 
   const isReadOnly = Boolean(config?.readOnly);
   const isDisabled = Boolean(config?.disabled);
-  const isComponentDisabled = isReadOnly || isDisabled;
+  const questionDisableFlag = question?.disableInput;
+
+  const isQuestionLevelDisabled = (() => {
+    if (typeof questionDisableFlag === 'boolean') {
+      return questionDisableFlag;
+    }
+    if (typeof questionDisableFlag === 'number') {
+      return questionDisableFlag !== 0;
+    }
+    if (typeof questionDisableFlag === 'string') {
+      const normalized = questionDisableFlag.trim().toLowerCase();
+      if (normalized === 'true') return true;
+      if (normalized === 'false') return false;
+      try {
+        const evaluated = evaluateExpression(questionDisableFlag, responses, variables, rowIndex);
+        return Boolean(evaluated);
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  })();
+
+  const isComponentDisabled = isReadOnly || isDisabled || isQuestionLevelDisabled;
   const locale = config?.locale ?? 'en';
   const translations = config?.translations ?? {};
   const fetchMedia = config?.fetchMedia;

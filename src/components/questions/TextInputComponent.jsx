@@ -21,6 +21,9 @@ const TextInputComponent = ({
   }, [value]);
 
   const handleChange = (event) => {
+    if (disabled) {
+      return;
+    }
     const newValue = event.target.value;
     setLocalValue(newValue);
     onChange(newValue);

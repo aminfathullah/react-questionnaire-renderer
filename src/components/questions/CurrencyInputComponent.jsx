@@ -64,6 +64,9 @@ const CurrencyInputComponent = ({
 
   // Handle input change
   const handleChange = (event) => {
+    if (disabled) {
+      return;
+    }
     const inputValue = event.target.value;
 
     // Allow empty input

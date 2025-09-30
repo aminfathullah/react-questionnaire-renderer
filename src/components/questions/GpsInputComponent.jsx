@@ -17,7 +17,8 @@ const GpsInputComponent = ({
   question, 
   value, 
   onChange, 
-  error 
+  error,
+  disabled = false
 }) => {
   const mapRef = useRef(null);
   const onChangeRef = useRef(onChange);
@@ -29,11 +30,23 @@ const GpsInputComponent = ({
   const [coordinates, setCoordinates] = useState(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [dragLimitWarning, setDragLimitWarning] = useState('');
+  const disabledRef = useRef(disabled);
 
   // Keep onChange ref updated
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
+
+  useEffect(() => {
+    disabledRef.current = disabled;
+    if (marker) {
+      if (disabled) {
+        marker.dragging?.disable();
+      } else {
+        marker.dragging?.enable();
+      }
+    }
+  }, [disabled, marker]);
 
   // Calculate distance between two points in meters
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -110,7 +123,7 @@ const GpsInputComponent = ({
       [coordinates.latitude, coordinates.longitude] :
       [-7.257419, 112.752088]; // Surabaya default
 
-    const mapInstance = window.L.map(mapRef.current).setView(defaultCenter, 15);
+  const mapInstance = window.L.map(mapRef.current).setView(defaultCenter, 15);
 
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -127,7 +140,7 @@ const GpsInputComponent = ({
     });
 
     const markerInstance = window.L.marker(defaultCenter, { 
-      draggable: true,
+      draggable: !disabledRef.current,
       icon: redIcon
     }).addTo(mapInstance);
 
@@ -140,6 +153,10 @@ const GpsInputComponent = ({
     }
 
     markerInstance.on('drag', (event) => {
+      if (disabledRef.current) {
+        event.target.setLatLng(initialPositionRef.current || event.target.getLatLng());
+        return;
+      }
       const latLng = event.target.getLatLng();
       const initialPos = initialPositionRef.current;
       
@@ -183,6 +200,10 @@ const GpsInputComponent = ({
     });
 
     markerInstance.on('dragend', (event) => {
+      if (disabledRef.current) {
+        event.target.setLatLng(initialPositionRef.current || event.target.getLatLng());
+        return;
+      }
       const latLng = event.target.getLatLng();
       const newCoords = { latitude: latLng.lat, longitude: latLng.lng };
       setCoordinates(newCoords);
@@ -200,7 +221,7 @@ const GpsInputComponent = ({
       setMarker(null);
       setMap(null);
     };
-  }, [leafletLoaded]); // Removed onChange from dependencies
+  }, [leafletLoaded, map, coordinates]);
 
   // Update marker position when coordinates change externally
   useEffect(() => {
@@ -211,6 +232,9 @@ const GpsInputComponent = ({
   }, [coordinates, marker, map]);
 
   const getCurrentLocation = () => {
+    if (disabled) {
+      return;
+    }
     if (!navigator.geolocation) {
       setErrorMessage('Geolocation is not supported by this browser');
       return;
@@ -266,6 +290,9 @@ const GpsInputComponent = ({
   };
 
   const handleManualInput = (field, value) => {
+    if (disabled) {
+      return;
+    }
     const numValue = parseFloat(value);
     if (isNaN(numValue)) return;
 
@@ -340,6 +367,7 @@ const GpsInputComponent = ({
             inputProps={{ step: 'any' }}
             size="small"
             sx={{ flex: 1 }}
+            disabled={disabled}
           />
           <TextField
             label="Longitude"
@@ -349,6 +377,7 @@ const GpsInputComponent = ({
             inputProps={{ step: 'any' }}
             size="small"
             sx={{ flex: 1 }}
+            disabled={disabled}
           />
         </Box>
       </Box>
@@ -358,7 +387,7 @@ const GpsInputComponent = ({
           variant="contained"
           startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <MyLocation />}
           onClick={getCurrentLocation}
-          disabled={isLoading}
+          disabled={isLoading || disabled}
           sx={{
             bgcolor: '#6b46c1',
             '&:hover': { bgcolor: '#553c9a' },

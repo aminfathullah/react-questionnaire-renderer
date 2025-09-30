@@ -22,6 +22,9 @@ const RadioGroupComponent = ({
   rowIndex = null
 }) => {
   const handleChange = (event) => {
+    if (disabled) {
+      return;
+    }
     const selectedValue = event.target.value;
     const selectedOption = options.find(opt => opt.value == selectedValue);
     
@@ -147,6 +150,7 @@ const RadioGroupComponent = ({
                   )}
                 </Box>
               }
+              disabled={disabled}
               sx={{
                 '&:hover': {
                   backgroundColor: 'action.hover',

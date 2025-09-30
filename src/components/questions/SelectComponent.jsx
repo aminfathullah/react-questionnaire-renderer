@@ -63,6 +63,9 @@ const SelectComponent = ({
   });
 
   const handleChange = (event) => {
+    if (disabled || lookupLoading) {
+      return;
+    }
     const selectedKey = event.target.value;
     if (selectedKey === '') {
       onChange(null);

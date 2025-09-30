@@ -25,6 +25,9 @@ const ListTextRepeatComponent = ({
   const [inputValue, setInputValue] = useState('');
 
   const handleAddItem = () => {
+    if (disabled) {
+      return;
+    }
     if (inputValue.trim()) {
       const currentValueArray = Array.isArray(value) ? value : [];
       const newValue = currentValueArray.length > 0 ? Math.max(...currentValueArray.map(item => item.value)) + 1 : 1;
@@ -40,12 +43,18 @@ const ListTextRepeatComponent = ({
   };
 
   const handleRemoveItem = (itemValue) => {
+    if (disabled) {
+      return;
+    }
     const currentValueArray = Array.isArray(value) ? value : [];
     const newArray = currentValueArray.filter(item => item.value !== itemValue);
     onChange(newArray);
   };
 
   const handleKeyPress = (event) => {
+    if (disabled) {
+      return;
+    }
     if (event.key === 'Enter') {
       handleAddItem();
     }

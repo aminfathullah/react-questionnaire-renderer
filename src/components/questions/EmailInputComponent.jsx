@@ -9,6 +9,9 @@ const EmailInputComponent = ({
   disabled = false 
 }) => {
   const handleChange = (event) => {
+    if (disabled) {
+      return;
+    }
     const newValue = event.target.value;
     onChange(newValue);
   };

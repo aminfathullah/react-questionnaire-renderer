@@ -16,6 +16,9 @@ const NumberInputComponent = ({
   const { setTouched, touched, setError } = useQuestionnaire();
 
   const handleChange = (event) => {
+    if (disabled) {
+      return;
+    }
     const newValue = event.target.value;
     // Convert to number if valid, otherwise keep as string for validation
     const numericValue = newValue === '' ? '' : Number(newValue);

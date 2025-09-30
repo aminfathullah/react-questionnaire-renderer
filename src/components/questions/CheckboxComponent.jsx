@@ -18,6 +18,9 @@ const CheckboxComponent = ({
   disabled = false 
 }) => {
   const handleChange = (optionValue) => (event) => {
+    if (disabled) {
+      return;
+    }
     const isChecked = event.target.checked;
     const selectedOption = options.find(opt => opt.value == optionValue);
     let currentValueArray = Array.isArray(value) ? [...value] : [];
@@ -133,6 +136,7 @@ const CheckboxComponent = ({
                   checked={currentValueArray.some(item => item.value == option.value)}
                   onChange={handleChange(option.value)}
                   size="medium"
+                  disabled={disabled}
                 />
               }
               label={
@@ -147,6 +151,7 @@ const CheckboxComponent = ({
                   )}
                 </Box>
               }
+              disabled={disabled}
               sx={{
                 borderRadius: 1,
                 m: 0,

@@ -104,6 +104,9 @@ const PhotoInputComponent = ({
 
   // Handle file selection from input
   const handleFileSelect = useCallback(async (file) => {
+    if (disabled) {
+      return;
+    }
     const validationError = validateFile(file);
     if (validationError) {
       setError(question.dataKey, validationError);
@@ -139,10 +142,13 @@ const PhotoInputComponent = ({
       setError(question.dataKey, 'Error memproses file.');
       setIsLoading(false);
     }
-  }, [onChange, question.dataKey, setError, validateFile]);
+  }, [disabled, onChange, question.dataKey, setError, validateFile]);
 
   // Handle camera capture
   const handleCameraCapture = useCallback(async () => {
+    if (disabled) {
+      return;
+    }
     if (!cameraSupported) return;
 
     try {
@@ -159,7 +165,7 @@ const PhotoInputComponent = ({
       // Fallback to file input
       fileInputRef.current?.click();
     }
-  }, [cameraSupported]);
+  }, [cameraSupported, disabled]);
 
   // Handle drag events
   const handleDrag = useCallback((e) => {
@@ -188,22 +194,30 @@ const PhotoInputComponent = ({
 
   // Handle file input change
   const handleFileInputChange = useCallback((e) => {
+    if (disabled) {
+      return;
+    }
     const file = e.target.files[0];
     if (file) {
       handleFileSelect(file);
     }
-  }, [handleFileSelect]);
+  }, [disabled, handleFileSelect]);
 
   // Handle camera input change
   const handleCameraInputChange = useCallback((e) => {
+    if (disabled) {
+      return;
+    }
     const file = e.target.files[0];
     if (file) {
       handleFileSelect(file);
     }
-  }, [handleFileSelect]);
+  }, [disabled, handleFileSelect]);
 
-  // Handle remove image
   const handleRemoveImage = useCallback(() => {
+    if (disabled) {
+      return;
+    }
     onChange(null);
     setPreviewUrl(null);
     setFileName('');
@@ -215,7 +229,7 @@ const PhotoInputComponent = ({
     if (cameraInputRef.current) {
       cameraInputRef.current.value = '';
     }
-  }, [onChange, question.dataKey, setError]);
+  }, [disabled, onChange, question.dataKey, setError]);
 
   // Handle blur for validation
   const handleBlur = () => {
@@ -383,6 +397,7 @@ const PhotoInputComponent = ({
         accept="image/*"
         onChange={handleFileInputChange}
         style={{ display: 'none' }}
+        disabled={disabled}
       />
       <input
         ref={cameraInputRef}
@@ -391,6 +406,7 @@ const PhotoInputComponent = ({
         capture="environment"
         onChange={handleCameraInputChange}
         style={{ display: 'none' }}
+        disabled={disabled}
       />
 
       {/* Error message */}

@@ -16,9 +16,13 @@ const NowInputComponent = ({
   error,
   disabled = false
 }) => {
-  const [completionTime, setCompletionTime] = useState(value.completionTime || '');
+  const initialCompletionTime = value && typeof value === 'object' ? value.completionTime || '' : '';
+  const [completionTime, setCompletionTime] = useState(initialCompletionTime);
 
   const handleGetTime = () => {
+    if (disabled) {
+      return;
+    }
     const now = new Date().toLocaleString('id-ID', {
       year: 'numeric',
       month: '2-digit',

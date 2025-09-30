@@ -19,6 +19,9 @@ const MultipleSelectComponent = ({
   disabled = false 
 }) => {
   const handleChange = (event) => {
+    if (disabled) {
+      return;
+    }
     const selectedValues = event.target.value;
     
     // Convert selected values to the expected format
@@ -96,6 +99,7 @@ const MultipleSelectComponent = ({
           multiple
           value={selectedValues}
           onChange={handleChange}
+          disabled={disabled}
           input={<OutlinedInput label={mainLabel || question.title} />}
           renderValue={(selected) => (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
