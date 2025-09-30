@@ -7,6 +7,7 @@ import {
   Button,
   LinearProgress,
   Alert,
+  Chip,
 } from '@mui/material';
 import { useQuestionnaire } from '../hooks/useQuestionnaire';
 import QuestionRenderer from './QuestionRenderer';
@@ -95,72 +96,157 @@ function SimpleQuestionnaireRenderer({ template: templateOverride, className, st
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }} className={className} style={style}>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          {effectiveTemplate?.title || 'Survey'} - Section {currentPage + 1} of {sections.length || 1}
-        </Typography>
-        <LinearProgress 
-          variant="determinate" 
-          value={sections.length ? ((currentPage + 1) / sections.length) * 100 : 0} 
-          sx={{ height: 8, borderRadius: 4 }}
-        />
-      </Box>
-
-      <Alert severity={isOnline ? 'success' : 'warning'} sx={{ mb: 3 }}>
-        Status: {isOnline ? 'Online' : 'Offline'}
-      </Alert>
-
-      {currentSection ? (
-        <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            {currentSection.label || currentSection.title}
-          </Typography>
-          
-          {currentSection.description && (
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-              {currentSection.description}
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 10 }} className={className} style={style}>
+      {/* Fixed Header */}
+      <Box 
+        sx={{ 
+          position: 'sticky', 
+          top: 0, 
+          zIndex: 1000, 
+          bgcolor: 'background.paper',
+          borderBottom: 1,
+          borderColor: 'divider',
+          boxShadow: 1,
+        }}
+      >
+        <Container maxWidth="md" sx={{ py: 2 }}>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="h5" gutterBottom fontWeight={600} color="primary.main">
+              {effectiveTemplate?.title || 'Survey'}
             </Typography>
-          )}
-
-          {renderSectionQuestions(currentSection)}
-        </Paper>
-      ) : (
-        <Alert severity="info">No sections available</Alert>
-      )}
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-        <Button 
-          variant="outlined" 
-          onClick={handlePrev}
-          disabled={currentPage === 0}
-        >
-          Previous
-        </Button>
-
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button 
-            variant="contained" 
-            onClick={handleNext}
-            disabled={currentPage >= sections.length - 1}
-          >
-            Next
-          </Button>
-          {sections.length > 0 && (
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={handleSubmit}
-              disabled={!canSubmit}
-            >
-              Submit
-            </Button>
-          )}
-        </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+              <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                Section {currentPage + 1} of {sections.length || 1}
+              </Typography>
+              <Chip 
+                label={isOnline ? 'Online' : 'Offline'} 
+                size="small"
+                color={isOnline ? 'success' : 'warning'}
+                sx={{ fontWeight: 600 }}
+              />
+            </Box>
+            <LinearProgress 
+              variant="determinate" 
+              value={sections.length ? ((currentPage + 1) / sections.length) * 100 : 0} 
+              sx={{ 
+                height: 10, 
+                borderRadius: 5,
+                bgcolor: 'action.hover',
+                '& .MuiLinearProgress-bar': {
+                  borderRadius: 5,
+                },
+              }}
+            />
+          </Box>
+        </Container>
       </Box>
 
-      {footer}
-    </Container>
+      <Container maxWidth="md" sx={{ py: { xs: 2, sm: 3 } }}>
+
+        {currentSection ? (
+          <Paper 
+            elevation={0} 
+            sx={{ 
+              p: { xs: 2, sm: 3, md: 4 }, 
+              mb: 3,
+              border: 1,
+              borderColor: 'divider',
+              borderRadius: 2,
+              bgcolor: 'background.paper',
+            }}
+          >
+            <Box sx={{ mb: 3, pb: 2, borderBottom: 2, borderColor: 'primary.main' }}>
+              <Typography variant="h4" gutterBottom fontWeight={600} color="text.primary">
+                {currentSection.label || currentSection.title}
+              </Typography>
+              
+              {currentSection.description && (
+                <Typography variant="body1" color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
+                  {currentSection.description}
+                </Typography>
+              )}
+            </Box>
+
+            {renderSectionQuestions(currentSection)}
+          </Paper>
+        ) : (
+          <Alert severity="info" sx={{ borderRadius: 2 }}>
+            No sections available. Please check the questionnaire configuration.
+          </Alert>
+        )}
+
+        {footer && <Box sx={{ mt: 3 }}>{footer}</Box>}
+      </Container>
+
+      {/* Fixed Bottom Navigation */}
+      <Paper
+        elevation={8}
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          py: { xs: 1.5, sm: 2 },
+          px: { xs: 2, sm: 3 },
+          zIndex: 1100,
+          borderRadius: 0,
+          borderTop: 2,
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+        }}
+      >
+        <Container maxWidth="md">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+            <Button 
+              variant="outlined" 
+              onClick={handlePrev}
+              disabled={currentPage === 0}
+              sx={{ 
+                minWidth: { xs: 80, sm: 100 },
+                fontWeight: 600,
+              }}
+            >
+              Previous
+            </Button>
+
+            <Box sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'center' }}>
+              <Typography variant="caption" color="text.secondary" display="block">
+                Progress: {Math.round(((currentPage + 1) / sections.length) * 100)}%
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {currentPage < sections.length - 1 ? (
+                <Button 
+                  variant="contained" 
+                  onClick={handleNext}
+                  disabled={currentPage >= sections.length - 1}
+                  sx={{ 
+                    minWidth: { xs: 80, sm: 100 },
+                    fontWeight: 600,
+                  }}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleSubmit}
+                  disabled={!canSubmit}
+                  sx={{ 
+                    minWidth: { xs: 100, sm: 120 },
+                    fontWeight: 600,
+                  }}
+                >
+                  Submit
+                </Button>
+              )}
+            </Box>
+          </Box>
+        </Container>
+      </Paper>
+    </Box>
   );
 }
 

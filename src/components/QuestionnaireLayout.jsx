@@ -143,34 +143,40 @@ function QuestionnaireLayout({
   };
 
   const drawer = (
-    <Box>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontSize: '14px' }}>
-          PDTSEN 2025 KOTA SURABAYA
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Toolbar sx={{ minHeight: { xs: 56, sm: 64 }, borderBottom: 1, borderColor: 'divider', bgcolor: 'primary.main' }}>
+        <Typography variant="subtitle1" component="div" sx={{ flexGrow: 1, fontSize: '13px', fontWeight: 600, color: 'white', lineHeight: 1.3 }}>
+          {effectiveTemplate?.title || 'Survey Sections'}
         </Typography>
         {isMobile && (
-          <IconButton onClick={handleDrawerToggle}>
+          <IconButton onClick={handleDrawerToggle} sx={{ color: 'white' }}>
             <ChevronLeftIcon />
           </IconButton>
         )}
       </Toolbar>
       
-      <List sx={{ px: 1 }}>
+      <List sx={{ px: 2, py: 2, flex: 1, overflow: 'auto' }}>
         {sections.map((section, index) => {
           const isActive = currentPage === index;
           const progress = getSectionProgress(index);
           
           return (
-            <ListItem key={section.dataKey || index} disablePadding sx={{ mb: 0.5 }}>
+            <ListItem key={section.dataKey || index} disablePadding sx={{ mb: 1 }}>
               <ListItemButton
                 selected={isActive}
                 onClick={() => handleSectionClick(index)}
                 sx={{
-                  borderRadius: 1,
+                  borderRadius: 2,
                   bgcolor: isActive ? 'primary.main' : 'transparent',
                   color: isActive ? 'white' : 'text.primary',
+                  py: 1.5,
+                  px: 2,
+                  transition: 'all 0.2s ease',
+                  border: 1,
+                  borderColor: isActive ? 'primary.main' : 'transparent',
                   '&:hover': {
                     bgcolor: isActive ? 'primary.dark' : 'action.hover',
+                    transform: 'translateX(4px)',
                   },
                   '&.Mui-selected': {
                     bgcolor: 'primary.main',
@@ -181,17 +187,18 @@ function QuestionnaireLayout({
                   },
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1.5 }}>
                   {progress === 'complete' ? (
-                    <CheckCircleIcon sx={{ mr: 1, fontSize: 16, color: isActive ? 'white' : 'success.main' }} />
+                    <CheckCircleIcon sx={{ fontSize: 20, color: isActive ? 'white' : 'success.main', flexShrink: 0 }} />
                   ) : (
-                    <RadioButtonUncheckedIcon sx={{ mr: 1, fontSize: 16 }} />
+                    <RadioButtonUncheckedIcon sx={{ fontSize: 20, opacity: 0.6, flexShrink: 0 }} />
                   )}
                   <ListItemText 
                     primary={section.label || `Section ${index + 1}`}
                     primaryTypographyProps={{
-                      fontSize: '13px',
-                      fontWeight: isActive ? 600 : 400,
+                      fontSize: '14px',
+                      fontWeight: isActive ? 600 : 500,
+                      lineHeight: 1.4,
                     }}
                   />
                 </Box>
@@ -204,15 +211,20 @@ function QuestionnaireLayout({
   );
 
   return (
-    <Box sx={{ display: 'flex' }} className={className} style={style}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }} className={className} style={style}>
       <AppBar
         position="fixed"
+        elevation={1}
         sx={{
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          width: { xs: '100%', md: `calc(100% - ${DRAWER_WIDTH}px)` },
           ml: { md: `${DRAWER_WIDTH}px` },
+          bgcolor: 'background.paper',
+          color: 'text.primary',
+          borderBottom: 1,
+          borderColor: 'divider',
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
           <IconButton
             color="inherit"
             edge="start"
@@ -221,17 +233,17 @@ function QuestionnaireLayout({
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
             {effectiveTemplate?.title || 'Questionnaire'}
           </Typography>
           <Chip 
             icon={<SubmitIcon />}
             label="Submit"
-            color="secondary"
+            color="success"
             clickable
             onClick={handleSubmit}
             disabled={!canSubmit}
-            sx={{ color: 'white', fontWeight: 600 }}
+            sx={{ fontWeight: 600, display: { xs: 'none', sm: 'flex' } }}
           />
         </Toolbar>
       </AppBar>
@@ -251,6 +263,9 @@ function QuestionnaireLayout({
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: DRAWER_WIDTH,
+              borderRight: 1,
+              borderColor: 'divider',
+              bgcolor: 'background.default',
             },
           }}
         >
@@ -262,41 +277,89 @@ function QuestionnaireLayout({
         component="main"
         sx={{
           flexGrow: 1,
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          width: { xs: '100%', md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        <Toolbar />
+        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }} />
         
-        <Container maxWidth="lg" sx={{ py: 3, pb: 12 }}>
-          {header}
+        <Container 
+          maxWidth="lg" 
+          sx={{ 
+            py: { xs: 2, sm: 3 }, 
+            pb: { xs: 12, sm: 14 },
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {header && <Box sx={{ mb: 2 }}>{header}</Box>}
+          
           {currentSection ? (
-            <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
-              {/* Render section questions */}
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: { xs: 2, sm: 3, md: 4 }, 
+                mb: 2,
+                border: 1,
+                borderColor: 'divider',
+                borderRadius: 2,
+                bgcolor: 'background.paper',
+              }}
+            >
+              <Typography 
+                variant="h5" 
+                component="h2" 
+                gutterBottom 
+                sx={{ 
+                  mb: 3, 
+                  fontWeight: 600,
+                  color: 'primary.main',
+                  borderBottom: 2,
+                  borderColor: 'primary.main',
+                  pb: 1,
+                }}
+              >
+                {currentSection.label || `Section ${currentPage + 1}`}
+              </Typography>
               {renderSectionQuestions(currentSection)}
             </Paper>
           ) : (
-            <Paper elevation={1} sx={{ p: 3, textAlign: 'center' }}>
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 4, 
+                textAlign: 'center',
+                border: 1,
+                borderColor: 'divider',
+                borderRadius: 2,
+              }}
+            >
               <Typography variant="h6" color="text.secondary">
                 Select a section from the sidebar to begin
               </Typography>
             </Paper>
           )}
 
-          {footer}
+          {footer && <Box sx={{ mt: 2 }}>{footer}</Box>}
 
-          {/* Sticky Navigation buttons */}
+          {/* Sticky Navigation footer */}
           <Paper
-            elevation={3}
+            elevation={8}
             sx={{
               position: 'fixed',
               bottom: 0,
-              left: 0,
+              left: { xs: 0, md: `${DRAWER_WIDTH}px` },
               right: 0,
-              p: 2,
-              zIndex: 1000,
+              py: { xs: 1.5, sm: 2 },
+              px: { xs: 2, sm: 3 },
+              zIndex: 1100,
               borderRadius: 0,
-              borderTop: 1,
+              borderTop: 2,
               borderColor: 'divider',
+              bgcolor: 'background.paper',
             }}
           >
             <Box
@@ -306,37 +369,54 @@ function QuestionnaireLayout({
                 alignItems: 'center',
                 maxWidth: 'lg',
                 mx: 'auto',
+                gap: { xs: 1, sm: 2 },
               }}
             >
               <Button
                 variant="outlined"
                 onClick={() => handleSectionClick(Math.max(0, currentPage - 1))}
                 disabled={currentPage === 0}
-                sx={{ minWidth: 120 }}
+                sx={{ 
+                  minWidth: { xs: 80, sm: 100 },
+                  fontWeight: 600,
+                }}
               >
                 Previous
               </Button>
 
-              <Typography variant="body2" color="text.secondary" sx={{ alignSelf: 'center', mx: 2 }}>
-                {currentSection?.label || 'No section selected'}
-              </Typography>
+              <Box sx={{ flex: 1, textAlign: 'center', display: { xs: 'none', sm: 'block' } }}>
+                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                  Section {currentPage + 1} of {sections.length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" noWrap>
+                  {currentSection?.label || 'No section selected'}
+                </Typography>
+              </Box>
 
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  variant="contained"
-                  onClick={() => handleSectionClick(Math.min(sections.length - 1, currentPage + 1))}
-                  disabled={currentPage >= sections.length - 1}
-                  sx={{ minWidth: 120 }}
-                >
-                  Next
-                </Button>
-                {sections.length > 0 && (
+                {currentPage < sections.length - 1 ? (
                   <Button
                     variant="contained"
-                    color="secondary"
+                    onClick={() => handleSectionClick(Math.min(sections.length - 1, currentPage + 1))}
+                    disabled={currentPage >= sections.length - 1}
+                    sx={{ 
+                      minWidth: { xs: 80, sm: 100 },
+                      fontWeight: 600,
+                    }}
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="success"
                     onClick={handleSubmit}
                     disabled={!canSubmit}
-                    sx={{ minWidth: 120 }}
+                    startIcon={<SubmitIcon />}
+                    sx={{ 
+                      minWidth: { xs: 100, sm: 120 },
+                      fontWeight: 600,
+                    }}
                   >
                     Submit
                   </Button>
