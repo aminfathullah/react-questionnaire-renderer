@@ -13,8 +13,8 @@ import {
   Paper,
   Button,
   IconButton,
-  useMediaQuery,
-  useTheme,
+  // useMediaQuery,
+  // useTheme,
   Chip
 } from '@mui/material';
 import {
@@ -54,8 +54,9 @@ function QuestionnaireLayout({
   header,
   footer
 }) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  // const theme = useTheme();
+  // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = true; // Always treat as mobile for simplicity
   
   const {
     currentPage,
