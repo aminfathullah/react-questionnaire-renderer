@@ -32,6 +32,7 @@ const GpsInputComponent = ({
   const [dragLimitWarning, setDragLimitWarning] = useState('');
   const disabledRef = useRef(disabled);
   const latestCoordinatesRef = useRef(null);
+  const accuracyRef = useRef(50);
 
   // Keep onChange ref updated
   useEffect(() => {
@@ -175,7 +176,8 @@ const GpsInputComponent = ({
           latLng.lng
         );
         
-        if (distance > 50) {
+        const movementLimit = accuracyRef.current || 50;
+        if (distance > movementLimit) {
           // Calculate the point that's exactly 50 meters from initial position
           const bearing = Math.atan2(
             latLng.lng - initialPos.longitude,
@@ -183,7 +185,7 @@ const GpsInputComponent = ({
           );
           
           const R = 6371000; // Earth radius in meters
-          const d = 50; // 50 meters
+          const d = movementLimit; // Movement limit based on GPS accuracy
           const lat1 = initialPos.latitude * Math.PI / 180;
           const lon1 = initialPos.longitude * Math.PI / 180;
           
@@ -198,7 +200,7 @@ const GpsInputComponent = ({
           
           const limitedLatLng = [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI];
           event.target.setLatLng(limitedLatLng);
-          setDragLimitWarning('Movement limited to 50 meters from initial position');
+          setDragLimitWarning(`Movement limited to ${Math.round(movementLimit)} meters from initial position (GPS accuracy)`);
           setTimeout(() => setDragLimitWarning(''), 3000);
         } else {
           setDragLimitWarning('');
@@ -253,13 +255,15 @@ const GpsInputComponent = ({
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy || 50;
         const newCoords = { latitude: lat, longitude: lng };
         
         setCoordinates(newCoords);
         onChange(JSON.stringify(newCoords));
 
-        // Update initial position reference when getting current location
+        // Update initial position reference and accuracy when getting current location
         initialPositionRef.current = newCoords;
+        accuracyRef.current = accuracy;
 
         const mapInstance = mapInstanceRef.current;
         const markerInstance = markerRef.current;
@@ -377,7 +381,7 @@ const GpsInputComponent = ({
             inputProps={{ step: 'any' }}
             size="small"
             sx={{ flex: 1 }}
-            disabled={disabled}
+            disabled
           />
           <TextField
             label="Longitude"
@@ -387,7 +391,7 @@ const GpsInputComponent = ({
             inputProps={{ step: 'any' }}
             size="small"
             sx={{ flex: 1 }}
-            disabled={disabled}
+            disabled
           />
         </Box>
       </Box>
