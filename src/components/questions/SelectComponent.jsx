@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Typography,
   Box,
-  FormHelperText
+  TextField,
+  CircularProgress
 } from '@mui/material';
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import ErrorMessage from '../common/ErrorMessage';
 import {
   useQuestionnaire,
@@ -15,8 +13,6 @@ import {
   getValue
 } from '../../hooks/useQuestionnaire';
 import { compareLoose } from '../../utils/lookups';
-
-const LOADING_OPTION_KEY = '__lookup-loading__';
 
 const normalizeArrayValue = (raw) => {
   if (Array.isArray(raw)) {
@@ -62,34 +58,26 @@ const SelectComponent = ({
     return !Array.isArray(sources) || sources.length === 0;
   });
 
-  const handleChange = (event) => {
+  const handleOptionChange = (_event, selectedOption) => {
     if (disabled || lookupLoading) {
       return;
     }
-    const selectedKey = event.target.value;
-    if (selectedKey === '') {
+
+    if (!selectedOption) {
       onChange(null);
       return;
     }
 
-    if (selectedKey === LOADING_OPTION_KEY) {
-      return;
-    }
-
-    const selectedOption = effectiveOptions.find((opt) => opt.optionKey === selectedKey);
-
-    const newValue = selectedOption
-      ? [{
-          value: selectedOption.value,
-          label: selectedOption.label,
-          meta: {
-            sourceId: selectedOption.sourceId,
-            row: selectedOption.row
-          }
-        }]
-      : null;
-
-    onChange(newValue);
+    onChange([
+      {
+        value: selectedOption.value,
+        label: selectedOption.label,
+        meta: {
+          sourceId: selectedOption.sourceId,
+          row: selectedOption.row
+        }
+      }
+    ]);
   };
 
   const handleBlur = () => {
@@ -256,114 +244,138 @@ const SelectComponent = ({
     return staticOptions;
   }, [hasLookupSources, lookupOptions, staticOptions]);
 
-  const selectedOptionKey = useMemo(() => {
+  const sortedOptions = useMemo(() => {
+    if (!effectiveOptions.length) return [];
+    const cloned = [...effectiveOptions];
+    cloned.sort((a, b) => {
+      const valA = a?.value ?? '';
+      const valB = b?.value ?? '';
+      return String(valA).localeCompare(String(valB), undefined, {
+        numeric: true,
+        sensitivity: 'base'
+      });
+    });
+    return cloned;
+  }, [effectiveOptions]);
+
+  const selectedOption = useMemo(() => {
     if (!Array.isArray(value) || value.length === 0) {
-      return '';
+      return null;
     }
     const current = value[0];
-    const storedValue = current && typeof current === 'object' ? current.value ?? current : current;
-    const matched = effectiveOptions.find((option) => compareLoose(option.value, storedValue));
-    return matched ? matched.optionKey : '';
-  }, [value, effectiveOptions]);
+    const storedValue = current && typeof current === 'object'
+      ? (current.value !== undefined ? current.value : current)
+      : current;
+    return sortedOptions.find((option) => compareLoose(option.value, storedValue)) || null;
+  }, [value, sortedOptions]);
+
+  const filterOptions = useMemo(() => createFilterOptions({
+    stringify: (option) => `${option?.label ?? ''} ${option?.value ?? ''} ${option?.description ?? ''}`.trim()
+  }), []);
 
   useEffect(() => {
     if (!hasLookupSources) return;
     if (!lookupInitialized) return;
     if (!Array.isArray(value) || value.length === 0) return;
-    if (effectiveOptions.length === 0 || !selectedOptionKey) {
+    if (!sortedOptions.length || !selectedOption) {
       onChange(null);
     }
-  }, [hasLookupSources, lookupInitialized, effectiveOptions, selectedOptionKey, value, onChange]);
+  }, [hasLookupSources, lookupInitialized, sortedOptions, selectedOption, value, onChange]);
 
-  const labelId = `select-${question.variable}-label`;
   const questionLabel = question.label || question.title || question.name || '';
   const { mainLabel, helpText } = parseLabel(questionLabel);
 
   return (
     <Box sx={{ width: '100%' }}>
       {question.instructions && (
-        <Typography 
-          variant="body2" 
-          color="text.secondary" 
+        <Typography
+          variant="body2"
+          color="text.secondary"
           sx={{ mb: 2 }}
         >
           {question.instructions}
         </Typography>
       )}
-      
-      <FormControl fullWidth error={!!error} disabled={disabled || lookupLoading}>
-        <InputLabel id={labelId} required={question.required}>
-          {mainLabel || question.title}
-        </InputLabel>
-        <Select
-          labelId={labelId}
-          value={selectedOptionKey}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          label={mainLabel || question.title}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                maxHeight: 300,
-              },
-            },
-          }}
-          sx={{
-            '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: 'divider',
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: 'primary.main',
-            },
-          }}
-        >
-          {!question.required && (
-            <MenuItem value="">
-              <em>Select an option...</em>
-            </MenuItem>
-          )}
 
-          {lookupLoading && (
-            <MenuItem disabled value={LOADING_OPTION_KEY}>
-              <em>Loading options...</em>
-            </MenuItem>
-          )}
-
-          {!lookupLoading && effectiveOptions.map((option) => (
-            <MenuItem key={option.optionKey} value={option.optionKey}>
-              <Box>
-                <Typography variant="body1">
-                  {option.label}
+      <Autocomplete
+        fullWidth
+        disableClearable={question.required}
+        options={sortedOptions}
+        value={selectedOption}
+        onChange={handleOptionChange}
+        onBlur={handleBlur}
+        disabled={disabled}
+        loading={lookupLoading}
+        filterOptions={filterOptions}
+        autoHighlight
+        includeInputInList
+        selectOnFocus
+        clearOnEscape
+        handleHomeEndKeys
+        getOptionLabel={(option) => option?.label ?? ''}
+        isOptionEqualToValue={(option, optionValue) =>
+          compareLoose(option.value, optionValue?.value ?? optionValue)
+        }
+        ListboxProps={{
+          style: { maxHeight: 300 }
+        }}
+        noOptionsText={
+          lookupLoading
+            ? 'Loading options...'
+            : lookupError
+              ? 'Failed to load options'
+              : 'No options available'
+        }
+        loadingText="Loading options..."
+        renderOption={(props, option) => (
+          <li {...props} key={option.optionKey}>
+            <Box>
+              <Typography variant="body1">
+                {option.label}
+              </Typography>
+              {option.description && (
+                <Typography variant="caption" color="text.secondary" display="block">
+                  {option.description}
                 </Typography>
-                {option.description && (
-                  <Typography variant="caption" color="text.secondary" display="block">
-                    {option.description}
-                  </Typography>
-                )}
-              </Box>
-            </MenuItem>
-          ))}
-
-          {!lookupLoading && hasLookupSources && !effectiveOptions.length && !lookupError && (
-            <MenuItem disabled value="__no-data__">
-              <em>No options available</em>
-            </MenuItem>
-          )}
-        </Select>
-        
-        {helpText && (
-          <FormHelperText sx={{ color: '#007bff', fontStyle: 'italic' }}>
-            {helpText}
-          </FormHelperText>
+              )}
+            </Box>
+          </li>
         )}
-
-        {lookupError && (
-          <FormHelperText error>
-            {lookupError}
-          </FormHelperText>
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={mainLabel || question.title}
+            required={question.required}
+            error={!!error}
+            placeholder={!question.required ? 'Select an option...' : undefined}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }}
+          />
         )}
-      </FormControl>
-      
+      />
+
+      {helpText && (
+        <Typography
+          variant="caption"
+          sx={{ color: '#007bff', fontStyle: 'italic', display: 'block', mt: 1 }}
+        >
+          {helpText}
+        </Typography>
+      )}
+
+      {lookupError && (
+        <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }}>
+          {lookupError}
+        </Typography>
+      )}
+
       <ErrorMessage
         error={error}
         isRequired={question.required}

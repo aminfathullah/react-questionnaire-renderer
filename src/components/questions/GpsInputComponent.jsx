@@ -23,14 +23,15 @@ const GpsInputComponent = ({
   const mapRef = useRef(null);
   const onChangeRef = useRef(onChange);
   const initialPositionRef = useRef(null);
-  const [map, setMap] = useState(null);
-  const [marker, setMarker] = useState(null);
+  const mapInstanceRef = useRef(null);
+  const markerRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [coordinates, setCoordinates] = useState(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [dragLimitWarning, setDragLimitWarning] = useState('');
   const disabledRef = useRef(disabled);
+  const latestCoordinatesRef = useRef(null);
 
   // Keep onChange ref updated
   useEffect(() => {
@@ -39,6 +40,7 @@ const GpsInputComponent = ({
 
   useEffect(() => {
     disabledRef.current = disabled;
+    const marker = markerRef.current;
     if (marker) {
       if (disabled) {
         marker.dragging?.disable();
@@ -46,7 +48,7 @@ const GpsInputComponent = ({
         marker.dragging?.enable();
       }
     }
-  }, [disabled, marker]);
+  }, [disabled]);
 
   // Calculate distance between two points in meters
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -90,6 +92,10 @@ const GpsInputComponent = ({
     }
   }, [value]);
 
+  useEffect(() => {
+    latestCoordinatesRef.current = coordinates;
+  }, [coordinates]);
+
   // Load Leaflet CSS and JS
   useEffect(() => {
     const loadLeaflet = () => {
@@ -117,13 +123,19 @@ const GpsInputComponent = ({
 
   // Initialize map when Leaflet is loaded
   useEffect(() => {
-    if (!leafletLoaded || !window.L || map) return;
+    if (!leafletLoaded || !window.L || mapInstanceRef.current || !mapRef.current) return;
 
-    const defaultCenter = coordinates ? 
-      [coordinates.latitude, coordinates.longitude] :
-      [-7.257419, 112.752088]; // Surabaya default
+    const initialCoords = initialPositionRef.current || latestCoordinatesRef.current || {
+      latitude: -7.257419,
+      longitude: 112.752088
+    };
+    const defaultCenter = [initialCoords.latitude, initialCoords.longitude];
 
-  const mapInstance = window.L.map(mapRef.current).setView(defaultCenter, 15);
+    if (!initialPositionRef.current) {
+      initialPositionRef.current = { ...initialCoords };
+    }
+
+    const mapInstance = window.L.map(mapRef.current).setView(defaultCenter, 15);
 
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -139,18 +151,13 @@ const GpsInputComponent = ({
       className: 'leaflet-div-icon custom-marker'
     });
 
-    const markerInstance = window.L.marker(defaultCenter, { 
+    const markerInstance = window.L.marker(defaultCenter, {
       draggable: !disabledRef.current,
       icon: redIcon
     }).addTo(mapInstance);
 
-    // Set initial position reference if not already set
-    if (!initialPositionRef.current) {
-      initialPositionRef.current = { 
-        latitude: defaultCenter[0], 
-        longitude: defaultCenter[1] 
-      };
-    }
+    markerRef.current = markerInstance;
+    mapInstanceRef.current = mapInstance;
 
     markerInstance.on('drag', (event) => {
       if (disabledRef.current) {
@@ -210,26 +217,25 @@ const GpsInputComponent = ({
       onChangeRef.current(JSON.stringify(newCoords));
     });
     
-    setMap(mapInstance);
-    setMarker(markerInstance);
-
     return () => {
+      markerRef.current = null;
+      mapInstanceRef.current = null;
       if (mapInstance) {
         mapInstance.off();
         mapInstance.remove();
       }
-      setMarker(null);
-      setMap(null);
     };
-  }, [leafletLoaded, map, coordinates]);
+  }, [leafletLoaded]);
 
   // Update marker position when coordinates change externally
   useEffect(() => {
+    const marker = markerRef.current;
+    const map = mapInstanceRef.current;
     if (!marker || !coordinates) return;
     if (!marker._map || !marker._icon) return; // guard
     marker.setLatLng([coordinates.latitude, coordinates.longitude]);
     if (map) map.panTo([coordinates.latitude, coordinates.longitude]);
-  }, [coordinates, marker, map]);
+  }, [coordinates]);
 
   const getCurrentLocation = () => {
     if (disabled) {
@@ -255,10 +261,12 @@ const GpsInputComponent = ({
         // Update initial position reference when getting current location
         initialPositionRef.current = newCoords;
 
-        if (map && marker && marker._icon) {
+        const mapInstance = mapInstanceRef.current;
+        const markerInstance = markerRef.current;
+        if (mapInstance && markerInstance && markerInstance._icon) {
           const newPosition = [lat, lng];
-          map.setView(newPosition, 15);
-          marker.setLatLng(newPosition);
+          mapInstance.setView(newPosition, 15);
+          markerInstance.setLatLng(newPosition);
         }
 
         setIsLoading(false);
@@ -307,10 +315,12 @@ const GpsInputComponent = ({
       initialPositionRef.current = newCoords;
     }
 
-    if (map && marker && marker._icon) {
+    const mapInstance = mapInstanceRef.current;
+    const markerInstance = markerRef.current;
+    if (mapInstance && markerInstance && markerInstance._icon) {
       const newPosition = [newCoords.latitude, newCoords.longitude];
-      map.setView(newPosition, 15);
-      marker.setLatLng(newPosition);
+      mapInstance.setView(newPosition, 15);
+      markerInstance.setLatLng(newPosition);
     }
   };
 
