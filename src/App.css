@@ -39,3 +39,20 @@
 .read-the-docs {
   color: #888;
 }
+
+.question-jump-highlight {
+  animation: question-jump-highlight 1.6s ease-out;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.35);
+  border-radius: 8px;
+  outline: none;
+}
+
+@keyframes question-jump-highlight {
+  0% {
+    background-color: rgba(25, 118, 210, 0.12);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}

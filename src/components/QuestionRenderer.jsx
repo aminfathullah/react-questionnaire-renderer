@@ -144,6 +144,7 @@ function QuestionRenderer({
 
   // Get current value
   const dataKey = rowIndex !== null ? `${question.dataKey}#${rowIndex}` : question.dataKey;
+  const baseDataKey = question?.dataKey;
   const currentValue = responses[dataKey] || variables[dataKey];
   const currentError = errors[dataKey];
 
@@ -300,7 +301,12 @@ function QuestionRenderer({
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box
+      sx={{ width: '100%' }}
+      data-question-id={typeof dataKey === 'string' ? dataKey : undefined}
+      data-question-base={typeof baseDataKey === 'string' ? baseDataKey : undefined}
+      tabIndex={-1}
+    >
       {renderQuestionComponent()}
     </Box>
   );

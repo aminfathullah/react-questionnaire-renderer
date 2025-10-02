@@ -15,7 +15,16 @@ import {
   IconButton,
   useMediaQuery,
   useTheme,
-  Chip
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -28,6 +37,17 @@ import { useQuestionnaire } from '../hooks/useQuestionnaire';
 import QuestionRenderer from './QuestionRenderer';
 
 const DRAWER_WIDTH = 280;
+
+const stripHtml = (value) => {
+  if (typeof value !== 'string') {
+    return value ? String(value) : '';
+  }
+  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
+const sanitizeSelectorValue = (value) => (
+  typeof value === 'string' ? value.replace(/"/g, '\\"') : ''
+);
 
 const extractSections = (template) => {
   if (!template?.components) {
@@ -70,11 +90,102 @@ function QuestionnaireLayout({
   } = useQuestionnaire();
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorEntries, setErrorEntries] = useState([]);
 
   const effectiveTemplate = templateOverride || template;
   const sections = useMemo(() => extractSections(effectiveTemplate), [effectiveTemplate]);
 
   const canSubmit = Boolean(submit);
+
+  const questionLookup = useMemo(() => {
+    const map = new Map();
+
+    const visit = (nodes, sectionIndex, sectionLabel) => {
+      if (!nodes) return;
+
+      if (Array.isArray(nodes)) {
+        nodes.forEach((node) => visit(node, sectionIndex, sectionLabel));
+        return;
+      }
+
+      const component = nodes;
+      if (component?.dataKey && !map.has(component.dataKey)) {
+        map.set(component.dataKey, {
+          sectionIndex,
+          sectionLabel,
+          question: component
+        });
+      }
+
+      if (component?.components) {
+        visit(component.components, sectionIndex, sectionLabel);
+      }
+    };
+
+    sections.forEach((section, index) => {
+      const sectionLabel = stripHtml(section?.label) || `Section ${index + 1}`;
+      visit(section?.components, index, sectionLabel);
+    });
+
+    return map;
+  }, [sections]);
+
+  const formatErrorEntries = useCallback((errorMap) => {
+    if (!errorMap || typeof errorMap !== 'object') {
+      return [];
+    }
+
+    const entries = Object.entries(errorMap).map(([fullKey, rawMessages]) => {
+      const messagesArray = Array.isArray(rawMessages)
+        ? rawMessages
+        : rawMessages
+          ? [rawMessages]
+          : [];
+
+      if (!messagesArray.length) {
+        return null;
+      }
+
+      const baseKey = fullKey.includes('#') ? fullKey.split('#')[0] : fullKey;
+      const lookup = questionLookup.get(fullKey) || questionLookup.get(baseKey);
+      const sectionIndex = lookup?.sectionIndex ?? null;
+      const sectionLabel = lookup?.sectionLabel
+        || (sectionIndex !== null && sections[sectionIndex]
+          ? stripHtml(sections[sectionIndex]?.label) || `Section ${sectionIndex + 1}`
+          : null);
+      const questionLabelRaw = lookup?.question?.label || lookup?.question?.title || baseKey;
+      const questionLabel = stripHtml(questionLabelRaw) || baseKey;
+      const rowIndex = fullKey.includes('#') ? fullKey.split('#')[1] : null;
+      const displayLabel = rowIndex ? `${questionLabel} (Row ${rowIndex})` : questionLabel;
+
+      const messages = messagesArray.map((msg) => {
+        if (typeof msg === 'string') {
+          const stripped = stripHtml(msg);
+          return stripped || msg;
+        }
+        return String(msg);
+      });
+
+      return {
+        dataKey: fullKey,
+        baseKey,
+        messages,
+        sectionIndex,
+        sectionLabel,
+        displayLabel
+      };
+    }).filter(Boolean);
+
+    entries.sort((a, b) => {
+      const sectionA = a.sectionIndex ?? Number.MAX_SAFE_INTEGER;
+      const sectionB = b.sectionIndex ?? Number.MAX_SAFE_INTEGER;
+      if (sectionA !== sectionB) return sectionA - sectionB;
+      return a.displayLabel.localeCompare(b.displayLabel, undefined, { sensitivity: 'base' });
+    });
+
+    return entries;
+  }, [questionLookup, sections]);
 
   const handleSubmit = useCallback(async () => {
     if (!submit) {
@@ -82,11 +193,19 @@ function QuestionnaireLayout({
       return;
     }
     try {
-      await submit();
+      const result = await submit();
+      if (!result?.ok) {
+        const formatted = formatErrorEntries(result?.errors ?? errors);
+        setErrorEntries(formatted);
+        setErrorDialogOpen(formatted.length > 0);
+      } else {
+        setErrorEntries([]);
+        setErrorDialogOpen(false);
+      }
     } catch (error) {
       console.error('Failed to submit questionnaire:', error);
     }
-  }, [submit]);
+  }, [submit, formatErrorEntries, errors]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -98,6 +217,58 @@ function QuestionnaireLayout({
       setMobileOpen(false);
     }
   };
+
+  const closeErrorDialog = useCallback(() => {
+    setErrorDialogOpen(false);
+  }, []);
+
+  const handleGotoQuestion = useCallback((entry) => {
+    if (!entry) return;
+
+    if (typeof entry.sectionIndex === 'number' && entry.sectionIndex >= 0) {
+      setCurrentPage(entry.sectionIndex);
+    }
+
+    setErrorDialogOpen(false);
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const safeFullKey = sanitizeSelectorValue(entry.dataKey);
+    const safeBaseKey = sanitizeSelectorValue(entry.baseKey);
+    let attempts = 0;
+    const maxAttempts = 12;
+
+    const attemptScroll = () => {
+      if (attempts >= maxAttempts) {
+        return;
+      }
+      attempts += 1;
+
+      const fullSelector = safeFullKey ? `[data-question-id="${safeFullKey}"]` : null;
+      const baseSelector = safeBaseKey ? `[data-question-base="${safeBaseKey}"]` : null;
+
+      const target = (fullSelector && document.querySelector(fullSelector))
+        || (baseSelector && document.querySelector(baseSelector));
+
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        const focusable = target.querySelector('input, textarea, select, button, [tabindex]:not([tabindex="-1"])');
+        if (focusable && typeof focusable.focus === 'function') {
+          focusable.focus({ preventScroll: true });
+        } else if (typeof target.focus === 'function') {
+          target.focus({ preventScroll: true });
+        }
+        target.classList.add('question-jump-highlight');
+        window.setTimeout(() => target.classList.remove('question-jump-highlight'), 2000);
+      } else {
+        window.setTimeout(attemptScroll, 150);
+      }
+    };
+
+    window.setTimeout(attemptScroll, 120);
+  }, [setCurrentPage]);
 
   const currentSection = sections[currentPage];
 
@@ -426,6 +597,73 @@ function QuestionnaireLayout({
           </Paper>
         </Container>
       </Box>
+
+      <Dialog
+        open={errorDialogOpen}
+        onClose={closeErrorDialog}
+        fullWidth
+        maxWidth="md"
+      >
+        <DialogTitle>
+          Validation Errors{errorEntries.length ? ` (${errorEntries.length})` : ''}
+        </DialogTitle>
+        <DialogContent dividers>
+          {errorEntries.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              All caught up! No validation issues were found.
+            </Typography>
+          ) : (
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600 }}>Question</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Issue</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {errorEntries.map((entry) => (
+                  <TableRow key={entry.dataKey} hover>
+                    <TableCell sx={{ minWidth: 220 }}>
+                      <Typography variant="subtitle2" component="div" gutterBottom>
+                        {entry.displayLabel}
+                      </Typography>
+                      {entry.sectionLabel && (
+                        <Typography variant="caption" color="text.secondary">
+                          {entry.sectionLabel}
+                        </Typography>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {entry.messages.map((message, index) => (
+                        <Typography
+                          key={`${entry.dataKey}-msg-${index}`}
+                          variant="body2"
+                          color="error"
+                        >
+                          • {message}
+                        </Typography>
+                      ))}
+                    </TableCell>
+                    <TableCell align="right">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => handleGotoQuestion(entry)}
+                      >
+                        Go&nbsp;to
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeErrorDialog}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
